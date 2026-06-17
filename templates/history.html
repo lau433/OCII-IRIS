@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}OCII-IRIS // HISTORIQUE{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.page-title{font-size:22px;font-weight:700;letter-spacing:0.04em;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.page-line{flex:1;height:1px;background:var(--border);}
+
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:40vh;gap:16px;text-align:center;
+}
+.empty-icon{font-family:var(--sans);font-size:36px;font-weight:700;letter-spacing:0.06em;color:var(--border);}
+.empty-label{font-size:13px;font-weight:500;letter-spacing:0.04em;color:var(--text-dim);}
+.empty-hint{font-size:12px;color:var(--text-dim);max-width:400px;line-height:1.7;}
+
+/* History cards */
+.hist-grid{display:flex;flex-direction:column;gap:10px;}
+.hist-card{
+  background:var(--surface-1);border:1px solid var(--border);border-radius:8px;
+  padding:16px 20px;display:grid;
+  grid-template-columns:auto 1fr auto;gap:0 20px;align-items:start;
+  transition:border-color var(--t-fast) var(--ease);
+}
+.hist-card:hover{border-color:var(--border-hover);}
+.hist-card.crit{border-left:3px solid var(--danger);}
+.hist-card.high{border-left:3px solid var(--warning);}
+.hist-card.med{border-left:3px solid var(--warning);}
+.hist-card.low{border-left:3px solid var(--text-dim);}
+
+/* Left: niveau + score */
+.hist-left{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;}
+.hist-danger{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.04em;text-align:center;}
+.danger-crit{color:var(--danger);}
+.danger-high{color:var(--warning);}
+.danger-med{color:var(--warning);}
+.danger-low{color:var(--text-dim);}
+.hist-score{font-family:var(--sans);font-size:28px;font-weight:700;line-height:1;}
+.hist-score-label{font-size:10px;letter-spacing:0.04em;color:var(--text-dim);}
+
+/* Center: content */
+.hist-center{}
+.hist-type{font-size:13px;color:var(--text);letter-spacing:0.02em;margin-bottom:4px;font-weight:600;}
+.hist-resume{font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:8px;}
+.hist-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.hist-tag{font-size:11px;letter-spacing:0.02em;color:var(--text-dim);}
+.hist-tag span{color:var(--text-muted);}
+
+/* Right: actions */
+.hist-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.hist-ts{font-size:11px;letter-spacing:0.02em;color:var(--text-dim);text-align:right;}
+.btn-view{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--accent);
+  border:1px solid var(--accent);padding:5px 14px;border-radius:6px;
+  text-decoration:none;white-space:nowrap;
+  display:inline-block;transition:all var(--t-fast) var(--ease);
+}
+.btn-view:hover{background:var(--accent-glow);}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+.filter-btn{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);
+  border:1px solid var(--border);padding:5px 14px;cursor:pointer;border-radius:6px;
+  background:none;transition:all var(--t-fast) var(--ease);
+}
+.filter-btn:hover{color:var(--text);border-color:var(--border-hover);background:var(--surface-2);}
+.filter-btn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+.result-count{font-size:11px;color:var(--text-dim);letter-spacing:0.04em;margin-left:auto;}
+
+.spin{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;gap:10px;padding:30px;
+  font-size:12px;color:var(--text-dim);letter-spacing:0.04em;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="page-title">Historique investigations</div>
+    <div class="page-sub">Analyses IA complétées — cette session</div>
+  </div>
+  <div class="page-line"></div>
+</div>
+
+<div class="toolbar">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Toutes</button>
+  <button class="filter-btn"        onclick="setFilter('CRITIQUE',this)">Critiques</button>
+  <button class="filter-btn"        onclick="setFilter('ELEVE',this)">Élevées</button>
+  <div class="result-count" id="result-count">—</div>
+</div>
+
+<div id="hist-container">
+  <div class="loading"><div class="spin"></div>CHARGEMENT...</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allHistory = [];
+let currentFilter = 'all';
+
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
+function fmtTs(ts){
+  if(!ts) return '—';
+  try{
+    const d=new Date(ts);
+    return d.toLocaleString('fr-FR',{
+      day:'2-digit',month:'2-digit',year:'numeric',
+      hour:'2-digit',minute:'2-digit'
+    });
+  }catch(e){return ts.slice(0,16).replace('T',' ');}
+}
+
+function dangerClass(n){
+  if(!n) return '';
+  n = n.toUpperCase();
+  if(n.includes('CRIT')) return 'crit';
+  if(n.includes('EL'))   return 'high';
+  if(n.includes('MOY'))  return 'med';
+  return 'low';
+}
+function dangerTxtClass(n){
+  if(!n) return 'danger-low';
+  n = n.toUpperCase();
+  if(n.includes('CRIT')) return 'danger-crit';
+  if(n.includes('EL'))   return 'danger-high';
+  if(n.includes('MOY'))  return 'danger-med';
+  return 'danger-low';
+}
+
+function renderHistory(){
+  const filtered = currentFilter==='all'
+    ? allHistory
+    : allHistory.filter(h=>(h.niveau_danger||'').toUpperCase().includes(currentFilter));
+
+  document.getElementById('result-count').textContent = filtered.length+' investigation'+(filtered.length!==1?'s':'');
+  const container = document.getElementById('hist-container');
+
+  if(!filtered.length && allHistory.length===0){
+    container.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">IRIS</div>
+        <div class="empty-label">Aucune investigation cette session</div>
+        <div class="empty-hint">
+          Les rapports d'analyse IA apparaissent ici après chaque investigation.
+          Cliquez sur « Enquêter » depuis le Dashboard, la page Agents ou la page Alertes.
+        </div>
+        <a href="/" style="font-size:12px;font-weight:500;color:var(--accent);text-decoration:none;
+          border:1px solid var(--accent);padding:8px 20px;border-radius:6px;transition:all var(--t-fast) var(--ease);">Aller au Dashboard</a>
+      </div>`;
+    return;
+  }
+
+  if(!filtered.length){
+    container.innerHTML='<div class="loading">Aucun résultat pour ce filtre</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="hist-grid">${filtered.map(h=>{
+    const dc  = dangerClass(h.niveau_danger);
+    const dtc = dangerTxtClass(h.niveau_danger);
+    const score = h.score_risque||0;
+    return `
+      <div class="hist-card ${dc}">
+        <div class="hist-left">
+          <div class="hist-danger ${dtc}">${(h.niveau_danger||'—').toUpperCase()}</div>
+          <div class="hist-score" style="color:${dc==='crit'?'var(--hot)':dc==='high'?'var(--warn)':dc==='med'?'var(--yellow)':'var(--txt2)'}">${score}</div>
+          <div class="hist-score-label">SCORE /100</div>
+        </div>
+        <div class="hist-center">
+          <div class="hist-type">${h.type_attaque||'—'}</div>
+          <div class="hist-resume">${(h.resume_executif||'Aucun résumé disponible').slice(0,200)}${(h.resume_executif||'').length>200?'…':''}</div>
+          <div class="hist-meta">
+            <span class="hist-tag">AGENT <span>${h.agent_name||'—'}</span></span>
+            <span class="hist-tag">RÈGLE NIV.<span>${h.rule_level||'?'}</span></span>
+            ${h.src_ip?`<span class="hist-tag">IP <span>${h.src_ip}</span></span>`:''}
+            <span class="hist-tag">ID <span>${(h.alert_id||'').slice(0,12)}…</span></span>
+          </div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-ts">${fmtTs(h.timestamp)}</div>
+          <a class="btn-view" href="/investigate?alert_id=${h.alert_id}">RAPPORT COMPLET</a>
+        </div>
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+async function loadHistory(){
+  try{
+    const res = await fetch('/api/history');
+    if(!res.ok) throw new Error(res.status);
+    allHistory = await res.json();
+    renderHistory();
+  }catch(e){
+    document.getElementById('hist-container').innerHTML=
+      `<div class="loading" style="color:var(--hot)">ERREUR: ${e.message}</div>`;
+  }
+}
+
+loadHistory();
+setInterval(loadHistory, 15000);  // Refresh toutes les 15s pour capter nouvelles analyses
+</script>
+{% endblock %}

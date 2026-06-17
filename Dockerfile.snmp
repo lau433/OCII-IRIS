@@ -1,0 +1,22 @@
+# OCII-IRIS — SNMP Trap Receiver
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Dépendances système pour pysnmp
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dépendances Python SNMP uniquement
+COPY requirements.snmp.txt .
+RUN pip install --no-cache-dir -r requirements.snmp.txt
+
+# Copie du receiver
+COPY snmp_receiver.py .
+
+# Le port 162/UDP doit être géré avec les droits root ou via cap_net_bind_service
+# On utilise un port > 1024 en dev, remappe via Docker en prod
+EXPOSE 162/udp
+
+CMD ["python", "-u", "snmp_receiver.py"]

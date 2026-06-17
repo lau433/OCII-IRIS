@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}OCII-IRIS{% endblock %}</title>
+<<<<<<< HEAD
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* ── Premium dark palette ── */
+  --bg:#0b1016;
+  --surface-1:#101823;--surface-2:#14202c;--surface-3:#1a2834;
+  --border:rgba(95,140,170,0.18);--border-hover:rgba(95,140,170,0.35);
+  --accent:#28c7e8;--accent-soft:#1b8da7;--accent-glow:rgba(40,199,232,0.12);
+  --success:#36d98a;--warning:#d8a24a;--danger:#d85f74;
+  --text:#d9e7f2;--text-muted:#7f95a8;--text-dim:#4a6478;
+  /* ── Typography ── */
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono','Cascadia Code',monospace;
+  /* ── Transitions ── */
+  --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+  --t-fast:120ms;--t-base:180ms;
+}
+html,body{min-height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5;}
+
+/* ── Compatibility aliases (pour les templates existants) ── */
+:root{
+  --void:var(--bg);--deep:var(--surface-1);--panel:var(--surface-1);
+  --edge:var(--surface-2);--wire:var(--border);
+  --cyan:var(--accent);--ice:var(--text);--hot:var(--danger);
+  --warn:var(--warning);--go:var(--success);--yellow:var(--warning);
+  --dim:var(--text-dim);--muted:var(--text-muted);
+  --txt:var(--text-muted);--txt2:var(--text-dim);--txt3:var(--text-dim);
+  --head:var(--sans);--sans2:var(--sans);
+=======
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#02040a;--deep:#060c18;--panel:#080f1e;--edge:#0d1f3c;--wire:#1a3a6a;
+  --cyan:#00e5ff;--ice:#b3f0ff;--hot:#ff1744;--warn:#ff9100;--go:#00e676;--yellow:#ffd600;
+  --dim:#1e3a5a;--muted:#2a4a72;--txt:#7ab3d4;--txt2:#3d6a8a;--txt3:#1a3a5a;
+  --mono:'IBM Plex Mono',monospace;--head:'Bebas Neue',sans-serif;--sans:'Space Grotesk',sans-serif;
+}
+html,body{min-height:100%;}
+body{background:var(--void);color:var(--txt);font-family:var(--mono);}
+
+/* Scan bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,229,255,0.012) 39px,rgba(0,229,255,0.012) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,229,255,0.012) 39px,rgba(0,229,255,0.012) 40px);
+  pointer-events:none;z-index:0;
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+}
+
+/* ── TOPBAR ── */
+nav{
+  position:sticky;top:0;z-index:100;
+<<<<<<< HEAD
+  height:56px;
+  background:var(--surface-1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 24px;gap:0;
+  backdrop-filter:blur(12px);
+=======
+  height:52px;
+  background:var(--panel);
+  border-bottom:1px solid var(--wire);
+  display:flex;align-items:center;
+  padding:0 24px;gap:0;
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+}
+
+.nav-brand{
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;margin-right:auto;
+}
+<<<<<<< HEAD
+.nav-logo-mark{width:28px;height:28px;position:relative;flex-shrink:0;}
+.nring{position:absolute;border-radius:50%;border:1.5px solid var(--accent);top:50%;left:50%;transform:translate(-50%,-50%);}
+.nr1{width:100%;height:100%;opacity:0.25;}
+.nr2{width:60%;height:60%;opacity:0.5;}
+.nr3{width:24%;height:24%;background:var(--accent);border:none;box-shadow:0 0 4px var(--accent);}
+.nav-name{font-family:var(--sans);font-size:16px;font-weight:700;letter-spacing:0.12em;color:var(--text);}
+
+.nav-sep{width:1px;height:24px;background:var(--border);margin:0 16px;}
+
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-link{
+  font-size:12px;font-weight:500;letter-spacing:0.06em;color:var(--text-muted);
+  text-decoration:none;padding:6px 14px;border-radius:6px;
+  transition:all var(--t-fast) var(--ease);white-space:nowrap;
+}
+.nav-link:hover{color:var(--text);background:var(--surface-2);}
+.nav-link.active{color:var(--accent);background:var(--accent-glow);}
+
+.nav-meta{display:flex;align-items:center;gap:16px;}
+.nav-stat{display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.08em;color:var(--text-dim);}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 6px var(--success);animation:lp 2s ease-in-out infinite;}
+@keyframes lp{0%,100%{opacity:0.7}50%{opacity:1}}
+
+.nav-right{display:flex;align-items:center;gap:14px;margin-left:auto;}
+.nav-clock{font-family:var(--mono);font-size:13px;letter-spacing:0.04em;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+.nav-user{font-size:12px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);}
+.nav-out{
+  font-size:11px;font-weight:500;color:var(--text-dim);
+  text-decoration:none;border:1px solid var(--border);border-radius:6px;
+  padding:5px 12px;transition:all var(--t-fast) var(--ease);
+}
+.nav-out:hover{color:var(--danger);border-color:var(--danger);}
+=======
+.nav-logo-mark{width:26px;height:26px;position:relative;flex-shrink:0;}
+.nring{position:absolute;border-radius:50%;border:1.5px solid var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);}
+.nr1{width:100%;height:100%;opacity:0.3;}
+.nr2{width:60%;height:60%;opacity:0.7;}
+.nr3{width:24%;height:24%;background:var(--cyan);border:none;box-shadow:0 0 6px var(--cyan);}
+.nav-name{font-family:var(--head);font-size:18px;letter-spacing:0.18em;color:var(--cyan);}
+
+.nav-sep{width:1px;height:28px;background:var(--wire);margin:0 18px;}
+
+.nav-meta{display:flex;align-items:center;gap:16px;}
+.nav-stat{display:flex;align-items:center;gap:5px;font-size:8px;letter-spacing:0.2em;color:var(--txt3);}
+.dot-live{width:5px;height:5px;border-radius:50%;background:var(--go);box-shadow:0 0 5px var(--go);animation:lp 1.5s ease-in-out infinite;}
+@keyframes lp{0%,100%{box-shadow:0 0 3px var(--go)}50%{box-shadow:0 0 9px var(--go)}}
+
+.nav-right{display:flex;align-items:center;gap:16px;margin-left:auto;}
+.nav-clock{font-size:11px;letter-spacing:0.1em;color:var(--txt2);font-variant-numeric:tabular-nums;}
+.nav-user{font-size:9px;letter-spacing:0.2em;color:var(--txt3);}
+.nav-out{
+  font-size:8px;letter-spacing:0.2em;color:var(--txt3);
+  text-decoration:none;border:1px solid var(--dim);
+  padding:3px 10px;transition:all 0.15s;
+}
+.nav-out:hover{color:var(--hot);border-color:var(--hot);}
+
+/* Top scan line */
+nav::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0.3;
+}
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+
+/* ── MAIN ── */
+main{
+  position:relative;z-index:1;
+  padding:24px 28px;
+<<<<<<< HEAD
+  max-width:1600px;
+  margin:0 auto;
+}
+
+/* ── Skeleton loader ── */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{
+  background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 50%,var(--surface-2) 75%);
+  background-size:200% 100%;animation:shimmer 1.8s ease-in-out infinite;
+  border-radius:4px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-soft);}
+
+/* ── Common utilities ── */
+.fade-in{animation:fadeIn var(--t-base) var(--ease);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+=======
+  max-width:1440px;
+  margin:0 auto;
+}
+
+/* Top progress bar */
+.progress-bar{position:fixed;top:0;left:0;right:0;height:2px;z-index:200;background:linear-gradient(90deg,var(--void),var(--cyan),var(--void));background-size:200% 100%;animation:progress 4s linear infinite;}
+@keyframes progress{from{background-position:100% 0}to{background-position:-100% 0}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--void);}
+::-webkit-scrollbar-thumb{background:var(--wire);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--cyan);}
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<<<<<<< HEAD
+=======
+<div class="progress-bar"></div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo-mark">
+      <div class="nring nr1"></div>
+      <div class="nring nr2"></div>
+      <div class="nring nr3"></div>
+    </div>
+    <span class="nav-name">OCII-IRIS</span>
+  </a>
+  <div class="nav-sep"></div>
+<<<<<<< HEAD
+  <div class="nav-links">
+    <a href="/"         class="nav-link {% if request.path == '/' %}active{% endif %}">DASHBOARD</a>
+    <a href="/agents"   class="nav-link {% if request.path == '/agents' %}active{% endif %}">AGENTS</a>
+    <a href="/alerts"   class="nav-link {% if request.path == '/alerts' %}active{% endif %}">ALERTES</a>
+    <a href="/history"  class="nav-link {% if request.path == '/history' %}active{% endif %}">HISTORIQUE</a>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-meta">
+    <div class="nav-stat"><div class="dot-live"></div>SIEM CONNECTÉ</div>
+=======
+  <div class="nav-meta">
+    <div class="nav-stat"><div class="dot-live"></div>SIEM CONNECTÉ</div>
+    <div class="nav-stat">IA LOCALE ACTIVE</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+  </div>
+  <div class="nav-right">
+    <span class="nav-clock" id="nav-clock">--:--:--</span>
+    {% if session.user %}<span class="nav-user">{{ session.user | upper }}</span>{% endif %}
+    {% if session.user %}<a href="/logout" class="nav-out">DÉCONNEXION</a>{% endif %}
+  </div>
+</nav>
+<main>{% block content %}{% endblock %}</main>
+<script>
+const nc=document.getElementById('nav-clock');
+function tick(){const n=new Date();nc.textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');}
+tick();setInterval(tick,1000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - Investigation SOC</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4da6ff;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        p.subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .row {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+            align-items: center;
+        }
+
+        .node {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            width: 220px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid;
+            position: relative;
+        }
+
+        .node small {
+            display: block;
+            font-weight: normal;
+            font-size: 0.85em;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* Thèmes de couleurs */
+        .user { background: rgba(255, 152, 0, 0.1); border-color: #ff9800; color: #ff9800; }
+        .core { background: rgba(33, 150, 243, 0.1); border-color: #2196f3; color: #2196f3; }
+        .ai { background: rgba(233, 30, 99, 0.1); border-color: #e91e63; color: #e91e63; }
+        .db { background: rgba(76, 175, 80, 0.1); border-color: #4caf50; color: #4caf50; }
+        .api { background: rgba(156, 39, 176, 0.1); border-color: #9c27b0; color: #9c27b0; }
+
+        /* Conteneur Docker */
+        .docker-zone {
+            border: 2px dashed #0db7ed;
+            padding: 40px 30px 30px 30px;
+            border-radius: 15px;
+            background: rgba(13, 183, 237, 0.03);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .docker-label {
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: #121212;
+            padding: 0 15px;
+            color: #0db7ed;
+            font-size: 1em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Flèches et connecteurs */
+        .arrow-down {
+            font-size: 28px;
+            color: #666;
+            margin: -10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .arrow-label {
+            font-size: 0.7em;
+            color: #aaa;
+            background: #121212;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Architecture du Système d'Investigation</h1>
+    <p class="subtitle">Schéma de flux de données et composants SOC</p>
+
+    <div class="diagram-container">
+        
+        <div class="row">
+            <div class="node user">
+                🌐 Réseau Interne OCII
+                <small>Accès restreint aux équipes</small>
+            </div>
+            <div class="node user">
+                📊 Grafana
+                <small>Data Link via URL paramétrée</small>
+            </div>
+        </div>
+
+        <div class="arrow-down">
+            <div class="arrow-label">Requêtes HTTP (:5000)</div>
+            ⬇
+        </div>
+
+        <div class="docker-zone">
+            <div class="docker-label">🐳 Déploiement Docker (Relance 1 commande)</div>
+            
+            <div class="node core">
+                🔒 Authentification
+                <small>Login / Mdp + "Se souvenir de moi"</small>
+            </div>
+
+            <div class="arrow-down">⬇</div>
+
+            <div class="node core" style="width: 280px; transform: scale(1.05);">
+                ⚙️ Serveur Web Flask
+                <small>Orchestrateur Python (Port 5000)<br>Gère les routes /investigate?alert_id=</small>
+            </div>
+
+            <div class="arrow-down">
+                <div class="arrow-label">Prompting & Contexte</div>
+                ⬇⬆
+            </div>
+
+            <div class="node ai">
+                🧠 Ollama (IA Locale)
+                <small>Modèle Llama 3.1 8B<br>Génération d'analyse SOC</small>
+            </div>
+        </div>
+
+        <div class="arrow-down">
+            <div class="arrow-label">Requêtes API externes & internes</div>
+            ⬇
+        </div>
+
+        <div class="row">
+            <div class="node db">
+                🗄️ OpenSearch (:9200)
+                <small>Source : wazuh-alerts-*<br>Fournit le JSON brut</small>
+            </div>
+            <div class="node api">
+                🛡️ AbuseIPDB API
+                <small>Enrichissement : Réputation IP</small>
+            </div>
+            <div class="node api">
+                🦠 VirusTotal API
+                <small>Enrichissement : Analyse de Hash</small>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

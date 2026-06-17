@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}OCII-IRIS // ERREUR{% endblock %}
+{% block content %}
+<<<<<<< HEAD
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;">
+  <div style="font-family:var(--sans);font-size:48px;font-weight:700;letter-spacing:0.06em;color:var(--danger);">ERREUR</div>
+  <div style="font-size:13px;color:var(--text-muted);max-width:480px;line-height:1.7;padding:14px 20px;border:1px solid rgba(216,95,116,0.25);border-left:3px solid var(--danger);background:rgba(216,95,116,0.04);border-radius:8px;">
+    {{ message }}
+  </div>
+  <a href="/" style="font-size:12px;font-weight:500;color:var(--accent);text-decoration:none;margin-top:8px;padding:8px 20px;border:1px solid var(--accent);border-radius:6px;transition:all 0.15s ease;"
+     onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='none'">← RETOUR AU DASHBOARD</a>
+=======
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:12px;text-align:center;">
+  <div style="font-family:var(--head);font-size:56px;letter-spacing:0.2em;color:var(--hot);text-shadow:0 0 20px rgba(255,23,68,0.3);">ERREUR</div>
+  <div style="font-size:9px;letter-spacing:0.15em;color:var(--txt2);max-width:480px;line-height:1.7;padding:12px 16px;border:1px solid rgba(255,23,68,0.25);border-left:3px solid var(--hot);background:rgba(255,23,68,0.04);">
+    {{ message }}
+  </div>
+  <a href="/" style="font-size:8px;letter-spacing:0.25em;color:var(--cyan);text-decoration:none;margin-top:8px;padding:6px 14px;border:1px solid var(--wire);">← RETOUR AU SYSTÈME</a>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+</div>
+{% endblock %}

@@ -1,0 +1,860 @@
+{% extends "base.html" %}
+{% block title %}OCII-IRIS // INV-{{ alert_id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── PAGE HDR ── */
+<<<<<<< HEAD
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:18px;margin-bottom:24px;border-bottom:1px solid var(--border);position:relative;}
+.page-hdr::after{content:'';position:absolute;bottom:-1px;left:0;width:120px;height:2px;background:var(--accent);border-radius:1px;}
+.phdr-tag{font-size:11px;letter-spacing:0.04em;color:var(--text-dim);margin-bottom:8px;}
+.phdr-title{font-family:var(--sans);font-size:26px;font-weight:700;letter-spacing:0.02em;color:var(--text);line-height:1;}
+.phdr-id{font-size:12px;font-family:var(--mono);letter-spacing:0.04em;color:var(--accent);margin-top:6px;}
+.phdr-right{text-align:right;}
+.phdr-ts{font-size:12px;letter-spacing:0.02em;color:var(--text-dim);}
+.phdr-agent{font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:0.02em;color:var(--accent);margin-top:6px;}
+
+/* ── VERDICT ── */
+.verdict{padding:24px 28px;margin-bottom:20px;border:1px solid var(--border);border-radius:10px;position:relative;overflow:hidden;display:grid;grid-template-columns:180px 1fr 130px;gap:24px;align-items:center;}
+.verdict::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--vcolor2,var(--accent));border-radius:0 2px 2px 0;}
+.verdict.CRITIQUE{--vcolor:rgba(216,95,116,0.06);--vcolor2:var(--danger);}
+.verdict.ELEVE{--vcolor:rgba(216,162,74,0.06);--vcolor2:var(--warning);}
+.verdict.MOYEN{--vcolor:rgba(216,162,74,0.04);--vcolor2:var(--warning);}
+.verdict.FAIBLE{--vcolor:rgba(54,217,138,0.06);--vcolor2:var(--success);}
+.verdict.INCONNU,.verdict.LOADING{--vcolor:rgba(40,199,232,0.03);--vcolor2:var(--accent);}
+.verdict{background:var(--vcolor,var(--surface-1));}
+.vlvl{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.vlvl-text{font-family:var(--sans);font-size:32px;font-weight:700;letter-spacing:0.02em;color:var(--vcolor2,var(--accent));line-height:1;}
+.vlvl-sub{font-size:10px;font-weight:500;letter-spacing:0.06em;color:var(--text-dim);}
+.vtype{font-size:12px;letter-spacing:0.02em;color:var(--vcolor2,var(--accent));margin-bottom:10px;font-weight:600;}
+.vresume{font-family:var(--sans);font-size:14px;color:var(--text);line-height:1.7;margin-bottom:12px;font-weight:400;}
+.vaction{font-size:12px;color:var(--text-muted);padding:10px 14px;border-left:3px solid var(--vcolor2,var(--accent));background:var(--surface-2);line-height:1.5;border-radius:0 6px 6px 0;}
+.vaction::before{content:'Action P1 → ';color:var(--vcolor2,var(--accent));font-weight:600;}
+.vscores{display:flex;flex-direction:column;gap:10px;align-items:center;}
+.vscore-ring{width:80px;height:80px;border-radius:50%;border:2px solid var(--vcolor2,var(--accent));display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.vscore-n{font-family:var(--sans);font-size:28px;font-weight:700;color:var(--vcolor2,var(--accent));line-height:1;}
+.vscore-d{font-size:9px;font-weight:500;letter-spacing:0.04em;color:var(--text-dim);}
+.vconf{font-size:11px;letter-spacing:0.02em;color:var(--text-dim);text-align:center;}
+
+/* SPINNER */
+.ai-loading{display:flex;align-items:center;gap:14px;padding:16px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-loading-txt{font-size:13px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);}
+.ai-loading-sub{font-size:12px;color:var(--text-dim);margin-top:4px;}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+
+/* PANEL */
+.panel{background:var(--surface-1);border:1px solid var(--border);border-radius:8px;}
+.panel-hdr{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface-2);border-radius:8px 8px 0 0;}
+.panel-hdr-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0;}
+.panel-hdr-txt{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text-muted);}
+.panel-body{padding:14px 16px;}
+
+/* DATA ROWS */
+.dr{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);gap:16px;}
+.dr:last-child{border-bottom:none;}
+.dk{font-size:11px;letter-spacing:0.02em;color:var(--text-dim);white-space:nowrap;flex-shrink:0;padding-top:1px;font-weight:500;}
+.dv{font-size:12px;color:var(--text);text-align:right;word-break:break-all;line-height:1.4;}
+.dv.accent{color:var(--accent);}
+.dv.danger{color:var(--danger);}
+.dv.warn{color:var(--warning);}
+.dv.ok{color:var(--success);}
+.dv.muted{color:var(--text-muted);}
+
+/* CHIP */
+.chip{display:inline-block;padding:3px 10px;font-size:11px;letter-spacing:0.02em;border:1px solid;font-weight:600;border-radius:6px;}
+.chip.high{color:var(--danger);border-color:rgba(216,95,116,0.4);background:rgba(216,95,116,0.08);}
+.chip.med{color:var(--warning);border-color:rgba(216,162,74,0.4);background:rgba(216,162,74,0.08);}
+.chip.low{color:var(--success);border-color:rgba(54,217,138,0.3);background:rgba(54,217,138,0.06);}
+
+/* TEXT BLOCKS */
+.tblock{font-size:13px;color:var(--text-muted);line-height:1.8;font-family:var(--sans);font-weight:400;}
+.tblock strong{color:var(--text);font-weight:600;}
+
+/* BAR */
+.bar-wrap{margin-top:12px;}
+.bar-meta{display:flex;justify-content:space-between;font-size:11px;letter-spacing:0.02em;color:var(--text-dim);margin-bottom:6px;}
+.bar{height:5px;background:var(--surface-2);overflow:hidden;border-radius:3px;}
+.bar-fill{height:100%;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);border-radius:3px;}
+.fill-r{background:var(--danger);}.fill-o{background:var(--warning);}.fill-y{background:var(--warning);}.fill-g{background:var(--success);}
+
+/* MITRE */
+.mitre-box{background:rgba(124,77,255,0.06);border:1px solid rgba(124,77,255,0.25);padding:14px 16px;margin-bottom:12px;border-radius:8px;}
+.mitre-tactic{font-size:11px;font-weight:600;letter-spacing:0.04em;color:#9575cd;margin-bottom:5px;}
+.mitre-tech{font-size:14px;color:#b39ddb;font-weight:600;margin-bottom:5px;}
+.mitre-desc{font-size:12px;color:var(--text-muted);line-height:1.6;}
+
+/* RECO */
+.reco-item{padding:14px 16px;margin-bottom:10px;border-left:4px solid;background:var(--surface-2);border-radius:0 8px 8px 0;}
+.reco-item:last-child{margin-bottom:0;}
+.reco-p1{border-color:var(--danger);}
+.reco-p2{border-color:var(--warning);}
+.reco-p3{border-color:var(--warning);}
+.reco-p4{border-color:var(--success);}
+.reco-label{font-size:11px;letter-spacing:0.04em;margin-bottom:8px;font-weight:700;}
+.reco-p1 .reco-label{color:var(--danger);}
+.reco-p2 .reco-label{color:var(--warning);}
+.reco-p3 .reco-label{color:var(--warning);}
+.reco-p4 .reco-label{color:var(--success);}
+.reco-text{font-size:13px;color:var(--text);line-height:1.7;font-family:var(--sans);font-weight:400;}
+
+/* IOC */
+.ioc-tag{display:inline-block;padding:4px 12px;margin:4px;font-size:11px;font-family:var(--mono);color:var(--warning);border:1px solid rgba(216,162,74,0.3);background:rgba(216,162,74,0.06);border-radius:6px;}
+
+/* CMD */
+.cmd-block{background:var(--surface-2);padding:10px 14px;margin-bottom:8px;font-size:11px;color:var(--success);font-family:var(--mono);border-radius:6px;line-height:1.6;}
+.cmd-block:last-child{margin-bottom:0;}
+
+/* TABLE */
+.htable{width:100%;border-collapse:collapse;}
+.htable th{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text-dim);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+.htable td{padding:8px 10px;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:12px;line-height:1.4;}
+.htable tr:last-child td{border-bottom:none;}
+.htable tbody tr:hover td{background:var(--surface-2);}
+
+/* GEO */
+.geo-box{background:rgba(40,199,232,0.04);border:1px solid rgba(40,199,232,0.15);padding:14px;text-align:center;margin-top:12px;border-radius:8px;}
+.geo-coords{font-size:14px;color:var(--accent);letter-spacing:0.02em;font-weight:600;}
+.geo-label{font-size:11px;color:var(--text-dim);margin-top:5px;}
+
+.empty{font-size:12px;letter-spacing:0.02em;color:var(--text-dim);text-align:center;padding:24px;border:1px dashed var(--border);border-radius:8px;}
+.ref-item{font-size:11px;color:var(--text-dim);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.5;}
+.ref-item::before{content:'→ ';color:var(--accent);}
+
+.ai-section{display:none;}
+=======
+.page-hdr{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding-bottom:16px;margin-bottom:20px;
+  border-bottom:1px solid var(--wire);
+  position:relative;
+}
+.page-hdr::after{
+  content:'';position:absolute;bottom:-1px;left:0;width:120px;height:1px;
+  background:var(--cyan);
+}
+.phdr-left{}
+.phdr-tag{font-size:7px;letter-spacing:0.35em;color:var(--txt3);margin-bottom:6px;}
+.phdr-title{font-family:var(--head);font-size:28px;letter-spacing:0.1em;color:var(--ice);line-height:1;}
+.phdr-id{font-size:9px;letter-spacing:0.2em;color:var(--cyan);margin-top:4px;}
+.phdr-right{text-align:right;}
+.phdr-ts{font-size:9px;letter-spacing:0.1em;color:var(--txt3);}
+.phdr-agent{font-family:var(--head);font-size:16px;letter-spacing:0.15em;color:var(--cyan);margin-top:4px;}
+
+/* ── VERDICT ── */
+.verdict{
+  padding:20px 24px;margin-bottom:20px;
+  border:1px solid var(--wire);
+  position:relative;overflow:hidden;
+  display:grid;grid-template-columns:140px 1fr 100px;gap:20px;align-items:center;
+}
+.verdict::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,0,0,0) 60%,var(--vcolor,rgba(0,229,255,0.04)));
+}
+.verdict::after{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--vcolor2,var(--cyan));
+}
+.verdict.CRITIQUE{--vcolor:rgba(255,23,68,0.06);--vcolor2:var(--hot);}
+.verdict.ELEVE{--vcolor:rgba(255,145,0,0.06);--vcolor2:var(--warn);}
+.verdict.MOYEN{--vcolor:rgba(255,214,0,0.06);--vcolor2:var(--yellow);}
+.verdict.FAIBLE{--vcolor:rgba(0,230,118,0.06);--vcolor2:var(--go);}
+
+.verdict-lvl{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.lvl-badge{
+  font-family:var(--head);font-size:36px;letter-spacing:0.1em;
+  color:var(--vcolor2,var(--cyan));line-height:1;
+  text-shadow:0 0 20px var(--vcolor2,var(--cyan));
+}
+.lvl-tag{font-size:7px;letter-spacing:0.3em;color:var(--txt3);}
+
+.verdict-body{}
+.verdict-resume{
+  font-family:var(--sans);font-size:13px;color:var(--ice);
+  line-height:1.6;margin-bottom:10px;font-weight:300;
+}
+.verdict-action{
+  font-size:9px;letter-spacing:0.1em;color:var(--txt2);
+  padding:8px 12px;border-left:2px solid var(--vcolor2,var(--cyan));
+  background:rgba(0,0,0,0.2);
+}
+.verdict-action::before{content:'ACTION → ';}
+
+.verdict-score{text-align:center;}
+.score-ring{
+  width:78px;height:78px;border-radius:50%;
+  border:2px solid var(--vcolor2,var(--cyan));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto;
+  box-shadow:0 0 12px rgba(0,229,255,0.1);
+}
+.score-n{font-family:var(--head);font-size:30px;color:var(--vcolor2,var(--cyan));line-height:1;}
+.score-d{font-size:7px;letter-spacing:0.2em;color:var(--txt3);}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+
+/* ── PANEL ── */
+.panel{
+  background:var(--deep);
+  border:1px solid var(--edge);
+  animation:panelIn 0.4s ease both;
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.panel:nth-child(2){animation-delay:.05s;}
+.panel:nth-child(3){animation-delay:.1s;}
+.panel:nth-child(4){animation-delay:.15s;}
+
+.panel-hdr{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;
+  border-bottom:1px solid var(--edge);
+  background:rgba(0,0,0,0.25);
+}
+.panel-hdr-dot{width:4px;height:4px;background:var(--cyan);flex-shrink:0;}
+.panel-hdr-txt{font-size:7px;letter-spacing:0.3em;color:var(--txt3);}
+.panel-body{padding:12px 14px;}
+
+/* ── DATA ROWS ── */
+.dr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:1px solid rgba(13,31,60,0.8);gap:12px;
+}
+.dr:last-child{border-bottom:none;}
+.dk{font-size:8px;letter-spacing:0.15em;color:var(--txt3);white-space:nowrap;flex-shrink:0;}
+.dv{font-size:10px;letter-spacing:0.05em;color:var(--ice);text-align:right;word-break:break-all;}
+.dv.accent{color:var(--cyan);}
+.dv.danger{color:var(--hot);}
+.dv.warn{color:var(--warn);}
+.dv.ok{color:var(--go);}
+
+/* ── LEVEL CHIP ── */
+.chip{
+  display:inline-block;padding:1px 7px;font-size:9px;letter-spacing:0.15em;
+  border:1px solid;
+}
+.chip.high{color:var(--hot);border-color:rgba(255,23,68,0.4);background:rgba(255,23,68,0.08);}
+.chip.med{color:var(--warn);border-color:rgba(255,145,0,0.4);background:rgba(255,145,0,0.08);}
+.chip.low{color:var(--go);border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.06);}
+
+/* ── BAR ── */
+.bar-wrap{margin-top:10px;}
+.bar-meta{display:flex;justify-content:space-between;font-size:7px;letter-spacing:0.15em;color:var(--txt3);margin-bottom:5px;}
+.bar{height:4px;background:var(--edge);position:relative;overflow:hidden;}
+.bar-fill{height:100%;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);}
+.bar-fill.r{background:var(--hot);}
+.bar-fill.o{background:var(--warn);}
+.bar-fill.y{background:var(--yellow);}
+.bar-fill.g{background:var(--go);}
+
+/* ── HISTORY TABLE ── */
+.htable{width:100%;border-collapse:collapse;font-size:9px;}
+.htable th{
+  font-size:7px;letter-spacing:0.2em;color:var(--txt3);
+  text-align:left;padding:6px 8px;
+  border-bottom:1px solid var(--wire);
+}
+.htable td{
+  padding:5px 8px;color:var(--txt2);
+  border-bottom:1px solid rgba(13,31,60,0.6);
+}
+.htable tr:last-child td{border-bottom:none;}
+.htable tbody tr:hover td{background:rgba(0,229,255,0.02);}
+
+/* ── EMPTY ── */
+.empty{font-size:9px;letter-spacing:0.15em;color:var(--txt3);text-align:center;padding:20px;border:1px dashed var(--edge);}
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+</style>
+{% endblock %}
+
+{% block content %}
+<<<<<<< HEAD
+
+<!-- ══ EN-TÊTE ══ -->
+<div class="page-hdr">
+  <div>
+    <div class="phdr-tag">RAPPORT D'INVESTIGATION AUTOMATISÉE — OCII-IRIS</div>
+=======
+{% set niveau = ai.get('niveau_danger', 'INCONNU') %}
+{% set score = ai.get('score', 0) %}
+
+<div class="page-hdr">
+  <div class="phdr-left">
+    <div class="phdr-tag">RAPPORT D'INVESTIGATION AUTOMATISÉE</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+    <div class="phdr-title">ANALYSE COMPLÈTE</div>
+    <div class="phdr-id">ID_ALERTE // {{ alert_id }}</div>
+  </div>
+  <div class="phdr-right">
+    <div class="phdr-ts">{{ alert.get('timestamp', 'N/A') }}</div>
+    <div class="phdr-agent">{{ alert.get('agent', {}).get('name', 'N/A') }}</div>
+  </div>
+</div>
+
+<<<<<<< HEAD
+<!-- ══ VERDICT IA — LOADING ══ -->
+<div class="verdict LOADING" id="verdict-box">
+  <div class="vlvl">
+    <div class="vlvl-text" id="ai-niveau">—</div>
+    <div class="vlvl-sub">NIVEAU DE MENACE</div>
+  </div>
+  <div class="vbody">
+    <div class="ai-loading" id="ai-loading-indicator">
+      <div class="spinner"></div>
+      <div>
+        <div class="ai-loading-txt">ANALYSE IA EN COURS...</div>
+        <div class="ai-loading-sub">Qwen2.5 7B analyse l'alerte — 30 à 90 secondes</div>
+      </div>
+    </div>
+    <div id="ai-content" style="display:none;">
+      <div class="vtype" id="ai-type"></div>
+      <div class="vresume" id="ai-resume"></div>
+      <div class="vaction" id="ai-action"></div>
+    </div>
+  </div>
+  <div class="vscores">
+    <div class="vscore-ring">
+      <div class="vscore-n" id="ai-score">—</div>
+      <div class="vscore-d">RISQUE</div>
+    </div>
+    <div class="vconf" id="ai-conf">ANALYSE EN COURS</div>
+  </div>
+</div>
+
+<!-- ══ ROW 1 : Alerte + Réseau ══ -->
+<div class="g2">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">DÉTAILS ALERTE WAZUH</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">RÈGLE</span><span class="dv">{{ alert.get('rule', {}).get('description', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">ID RÈGLE</span><span class="dv accent">{{ alert.get('rule', {}).get('id', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">NIVEAU</span><span class="dv">
+        {% set lvl = alert.get('rule', {}).get('level', 0) | int %}
+        {% if lvl >= 10 %}<span class="chip high">{{ lvl }} / 15</span>
+        {% elif lvl >= 6 %}<span class="chip med">{{ lvl }} / 15</span>
+        {% else %}<span class="chip low">{{ lvl }} / 15</span>{% endif %}
+      </span></div>
+      <div class="dr"><span class="dk">GROUPES</span><span class="dv muted">{{ alert.get('rule', {}).get('groups', []) | join(', ') or '—' }}</span></div>
+      <div class="dr"><span class="dk">DÉCLENCHÉE</span><span class="dv warn">{{ ctx.firedtimes }} fois (total)</span></div>
+      <div class="dr"><span class="dk">TIMESTAMP</span><span class="dv muted">{{ alert.get('timestamp', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">AGENT</span><span class="dv accent">{{ alert.get('agent', {}).get('name', 'N/A') }}</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">ANALYSE RÉSEAU</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">IP SOURCE</span><span class="dv danger">{{ ctx.src_ip or '—' }}</span></div>
+      <div class="dr"><span class="dk">PORT SOURCE</span><span class="dv muted">{{ ctx.src_port or '—' }}</span></div>
+      <div class="dr"><span class="dk">IP DESTINATION</span><span class="dv">{{ ctx.dst_ip or '—' }}</span></div>
+      <div class="dr"><span class="dk">PORT DEST.</span><span class="dv accent">{{ ctx.dst_port or '—' }}</span></div>
+      <div class="dr"><span class="dk">SERVICE CIBLÉ</span><span class="dv warn">{{ ctx.port_service }}</span></div>
+      <div class="dr"><span class="dk">PROTOCOLE</span><span class="dv muted">{{ ctx.protocol }}</span></div>
+      <div class="dr"><span class="dk">ACTION</span><span class="dv {% if ctx.log_subtype == 'Denied' %}danger{% else %}ok{% endif %}">{{ ctx.log_subtype or '—' }}</span></div>
+      {% if rdns %}<div class="dr"><span class="dk">DNS INVERSE</span><span class="dv muted">{{ rdns }}</span></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ══ ROW 2 : Géoloc + Sophos ══ -->
+<div class="g2">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">GÉOLOCALISATION SOURCE</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">PAYS</span><span class="dv warn">{{ ctx.country or ctx.src_country or '—' }}</span></div>
+      <div class="dr"><span class="dk">RÉGION / VILLE</span><span class="dv muted">{{ ctx.region }}{% if ctx.city %}, {{ ctx.city }}{% endif %}</span></div>
+      <div class="dr"><span class="dk">CODE PAYS</span><span class="dv muted">{{ ctx.src_country or '—' }}</span></div>
+      {% if ctx.lat %}<div class="dr"><span class="dk">COORDONNÉES</span><span class="dv muted">{{ ctx.lat }}, {{ ctx.lon }}</span></div>{% endif %}
+      {% if ctx.city or ctx.country %}
+      <div class="geo-box">
+        <div class="geo-coords">📍 {{ ctx.city }}{% if ctx.city and ctx.country %}, {% endif %}{{ ctx.country }}</div>
+        {% if ctx.lat %}<div class="geo-label">{{ ctx.lat }}°N {{ ctx.lon }}°E</div>{% endif %}
+      </div>
+      {% endif %}
+      <div id="ai-geo" class="ai-section tblock" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  {% if ctx.sophos %}
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">DÉTAILS FIREWALL SOPHOS XGS</span></div>
+    <div class="panel-body">
+      {% if ctx.sophos.get('fw_rule_name') %}<div class="dr"><span class="dk">RÈGLE FW</span><span class="dv accent">{{ ctx.sophos.fw_rule_name }}</span></div>{% endif %}
+      {% if ctx.sophos.get('fw_rule_type') %}<div class="dr"><span class="dk">TYPE RÈGLE</span><span class="dv muted">{{ ctx.sophos.fw_rule_type }}</span></div>{% endif %}
+      {% if ctx.sophos.get('log_component') %}<div class="dr"><span class="dk">COMPOSANT</span><span class="dv muted">{{ ctx.sophos.log_component }}</span></div>{% endif %}
+      {% if ctx.sophos.get('in_interface') %}<div class="dr"><span class="dk">INTERFACE</span><span class="dv muted">{{ ctx.sophos.in_interface }}</span></div>{% endif %}
+      {% if ctx.sophos.get('app_name') %}<div class="dr"><span class="dk">APPLICATION</span><span class="dv warn">{{ ctx.sophos.app_name }}</span></div>{% endif %}
+      {% if ctx.sophos.get('app_category') %}<div class="dr"><span class="dk">CATÉGORIE</span><span class="dv muted">{{ ctx.sophos.app_category }}</span></div>{% endif %}
+      {% if ctx.sophos.get('app_risk') %}<div class="dr"><span class="dk">RISQUE APP</span><span class="dv warn">{{ ctx.sophos.app_risk }}</span></div>{% endif %}
+      {% if ctx.sophos.get('src_mac') %}<div class="dr"><span class="dk">MAC SOURCE</span><span class="dv muted">{{ ctx.sophos.src_mac }}</span></div>{% endif %}
+      {% if ctx.sophos.get('bytes_sent') %}<div class="dr"><span class="dk">BYTES ENVOYÉS</span><span class="dv muted">{{ ctx.sophos.bytes_sent }}</span></div>{% endif %}
+      {% if ctx.sophos.get('bytes_received') %}<div class="dr"><span class="dk">BYTES REÇUS</span><span class="dv muted">{{ ctx.sophos.bytes_received }}</span></div>{% endif %}
+      {% if ctx.sophos.get('severity') %}<div class="dr"><span class="dk">SÉVÉRITÉ</span><span class="dv muted">{{ ctx.sophos.severity }}</span></div>{% endif %}
+      {% if ctx.sophos.get('device_model') %}<div class="dr"><span class="dk">MODÈLE</span><span class="dv muted">{{ ctx.sophos.device_model }}</span></div>{% endif %}
+      {% if ctx.sophos.get('log_id') %}<div class="dr"><span class="dk">LOG ID SOPHOS</span><span class="dv muted">{{ ctx.sophos.log_id }}</span></div>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ══ ROW 3 : AbuseIPDB + VirusTotal ══ -->
+<div class="g2">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">ABUSEIPDB — THREAT INTELLIGENCE</span></div>
+    <div class="panel-body">
+      {% if abuse_data %}
+        {% set sc = abuse_data.get('abuseConfidenceScore', 0) %}
+        <div class="dr"><span class="dk">IP ANALYSÉE</span><span class="dv danger">{{ src_ip }}</span></div>
+        <div class="dr"><span class="dk">PAYS</span><span class="dv warn">{{ abuse_data.get('countryCode', '—') }}</span></div>
+        <div class="dr"><span class="dk">TYPE</span><span class="dv muted">{{ abuse_data.get('usageType', '—') }}</span></div>
+        <div class="dr"><span class="dk">ISP</span><span class="dv muted">{{ abuse_data.get('isp', '—') }}</span></div>
+        <div class="dr"><span class="dk">DOMAINE</span><span class="dv muted">{{ abuse_data.get('domain', '—') }}</span></div>
+        <div class="dr"><span class="dk">SIGNALEMENTS</span><span class="dv {% if sc > 50 %}danger{% elif sc > 20 %}warn{% else %}ok{% endif %}">{{ abuse_data.get('totalReports', 0) }} rapports</span></div>
+        <div class="dr"><span class="dk">DERNIÈRE VUE</span><span class="dv muted">{{ abuse_data.get('lastReportedAt', '—') }}</span></div>
+        <div class="bar-wrap">
+          <div class="bar-meta"><span>SCORE ABUS</span><span style="color:{% if sc>=70 %}var(--hot){% elif sc>=40 %}var(--warn){% else %}var(--go){% endif %}">{{ sc }} / 100</span></div>
+          <div class="bar"><div class="bar-fill {% if sc>=70 %}fill-r{% elif sc>=40 %}fill-o{% elif sc>=20 %}fill-y{% else %}fill-g{% endif %}" style="width:{{ sc }}%"></div></div>
+        </div>
+=======
+<!-- VERDICT -->
+<div class="verdict {{ niveau }}">
+  <div class="verdict-lvl">
+    <div class="lvl-badge">{{ niveau }}</div>
+    <div class="lvl-tag">NIVEAU DE MENACE</div>
+  </div>
+  <div class="verdict-body">
+    <div class="verdict-resume">{{ ai.get('resume', 'Analyse IA indisponible.') }}</div>
+    <div class="verdict-action">{{ ai.get('action', 'Vérifier manuellement.') }}</div>
+  </div>
+  <div class="verdict-score">
+    <div class="score-ring">
+      <div class="score-n">{{ score }}</div>
+      <div class="score-d">/ 100</div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 1 : Alerte + Machine -->
+<div class="g2">
+
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">DÉTAILS ALERTE WAZUH</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">RÈGLE</span>
+        <span class="dv">{{ alert.get('rule', {}).get('description', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">ID RÈGLE</span>
+        <span class="dv accent">{{ alert.get('rule', {}).get('id', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">NIVEAU</span>
+        <span class="dv">
+          {% set lvl = alert.get('rule', {}).get('level', 0) | int %}
+          {% if lvl >= 10 %}<span class="chip high">{{ lvl }} / 15</span>
+          {% elif lvl >= 6 %}<span class="chip med">{{ lvl }} / 15</span>
+          {% else %}<span class="chip low">{{ lvl }} / 15</span>{% endif %}
+        </span></div>
+      <div class="dr"><span class="dk">GROUPES</span>
+        <span class="dv">{{ alert.get('rule', {}).get('groups', []) | join(', ') or '—' }}</span></div>
+      <div class="dr"><span class="dk">TIMESTAMP</span>
+        <span class="dv">{{ alert.get('timestamp', 'N/A') }}</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">MACHINE CIBLE</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">HOSTNAME</span>
+        <span class="dv accent">{{ alert.get('agent', {}).get('name', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">AGENT ID</span>
+        <span class="dv">{{ alert.get('agent', {}).get('id', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">IP INTERNE</span>
+        <span class="dv">{{ alert.get('agent', {}).get('ip', 'N/A') }}</span></div>
+      <div class="dr"><span class="dk">IP SOURCE</span>
+        <span class="dv {% if src_ip %}danger{% endif %}">{{ src_ip or '—' }}</span></div>
+      <div class="dr"><span class="dk">ALERTES RÉCENTES</span>
+        <span class="dv warn">{{ history | length }} alertes</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 2 : AbuseIPDB + VirusTotal -->
+<div class="g2">
+
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">ABUSEIPDB // RÉPUTATION IP</span></div>
+    <div class="panel-body">
+      {% if abuse_data %}
+        {% set sc = abuse_data.get('abuseConfidenceScore', 0) %}
+        <div class="dr"><span class="dk">IP ANALYSÉE</span><span class="dv">{{ src_ip }}</span></div>
+        <div class="dr"><span class="dk">PAYS</span><span class="dv">{{ abuse_data.get('countryCode', '—') }}</span></div>
+        <div class="dr"><span class="dk">TYPE</span><span class="dv">{{ abuse_data.get('usageType', '—') }}</span></div>
+        <div class="dr"><span class="dk">ISP</span><span class="dv">{{ abuse_data.get('isp', '—') }}</span></div>
+        <div class="dr"><span class="dk">SIGNALEMENTS</span>
+          <span class="dv {% if sc > 50 %}danger{% elif sc > 20 %}warn{% else %}ok{% endif %}">
+            {{ abuse_data.get('totalReports', 0) }} rapports
+          </span></div>
+        <div class="bar-wrap">
+          <div class="bar-meta"><span>SCORE ABUS</span>
+            <span style="color:{% if sc>=70 %}var(--hot){% elif sc>=40 %}var(--warn){% else %}var(--go){% endif %}">{{ sc }} / 100</span></div>
+          <div class="bar"><div class="bar-fill {% if sc>=70 %}r{% elif sc>=40 %}o{% elif sc>=20 %}y{% else %}g{% endif %}" style="width:{{ sc }}%"></div></div>
+        </div>
+      {% elif not src_ip %}
+        <div class="empty">AUCUNE IP SOURCE DÉTECTÉE</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+      {% else %}
+        <div class="empty">IP PRIVÉE OU CLÉ NON CONFIGURÉE</div>
+      {% endif %}
+    </div>
+  </div>
+<<<<<<< HEAD
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">VIRUSTOTAL — ANALYSE MOTEURS AV</span></div>
+    <div class="panel-body">
+      {% if vt_data %}
+        {% set stats = vt_data.get('stats', {}) %}
+        {% set mal = stats.get('malicious', 0) %}
+        {% set sus = stats.get('suspicious', 0) %}
+        {% set har = stats.get('harmless', 0) %}
+        {% set tot = mal + sus + har + stats.get('undetected', 0) %}
+        <div class="dr"><span class="dk">MALVEILLANT</span><span class="dv danger">{{ mal }} moteurs</span></div>
+        <div class="dr"><span class="dk">SUSPECT</span><span class="dv warn">{{ sus }} moteurs</span></div>
+        <div class="dr"><span class="dk">INOFFENSIF</span><span class="dv ok">{{ har }} moteurs</span></div>
+        <div class="dr"><span class="dk">RÉPUTATION</span><span class="dv {% if vt_data.get('reputation', 0) < 0 %}danger{% else %}ok{% endif %}">{{ vt_data.get('reputation', 0) }}</span></div>
+        <div class="dr"><span class="dk">ASN</span><span class="dv muted">{{ vt_data.get('asn', '—') }} — {{ vt_data.get('as_owner', '—') }}</span></div>
+        <div class="dr"><span class="dk">RÉSEAU</span><span class="dv muted">{{ vt_data.get('network', '—') }}</span></div>
+        {% if tot > 0 %}
+        {% set pct = ((mal / tot) * 100) | round | int %}
+        <div class="bar-wrap">
+          <div class="bar-meta"><span>TAUX DÉTECTION</span><span style="color:{% if mal>5 %}var(--hot){% elif mal>0 %}var(--warn){% else %}var(--go){% endif %}">{{ pct }}%</span></div>
+          <div class="bar"><div class="bar-fill {% if mal>5 %}fill-r{% elif mal>0 %}fill-o{% else %}fill-g{% endif %}" style="width:{{ pct }}%"></div></div>
+        </div>
+        {% endif %}
+=======
+
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">VIRUSTOTAL // MOTEURS AV</span></div>
+    <div class="panel-body">
+      {% if vt_data %}
+        {% set mal = vt_data.get('malicious', 0) %}
+        {% set sus = vt_data.get('suspicious', 0) %}
+        {% set har = vt_data.get('harmless', 0) %}
+        {% set tot = mal + sus + har + vt_data.get('undetected', 0) %}
+        <div class="dr"><span class="dk">MALVEILLANT</span><span class="dv danger">{{ mal }} moteurs</span></div>
+        <div class="dr"><span class="dk">SUSPECT</span><span class="dv warn">{{ sus }} moteurs</span></div>
+        <div class="dr"><span class="dk">INOFFENSIF</span><span class="dv ok">{{ har }} moteurs</span></div>
+        <div class="dr"><span class="dk">TOTAL ANALYSÉ</span><span class="dv">{{ tot }} moteurs</span></div>
+        {% if tot > 0 %}
+        {% set pct = ((mal / tot) * 100) | round | int %}
+        <div class="bar-wrap">
+          <div class="bar-meta"><span>TAUX DÉTECTION</span>
+            <span style="color:{% if mal>5 %}var(--hot){% elif mal>0 %}var(--warn){% else %}var(--go){% endif %}">{{ pct }}%</span></div>
+          <div class="bar"><div class="bar-fill {% if mal>5 %}r{% elif mal>0 %}o{% else %}g{% endif %}" style="width:{{ pct }}%"></div></div>
+        </div>
+        {% endif %}
+      {% elif not src_ip %}
+        <div class="empty">AUCUNE IP SOURCE DÉTECTÉE</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+      {% else %}
+        <div class="empty">IP PRIVÉE OU CLÉ NON CONFIGURÉE</div>
+      {% endif %}
+    </div>
+  </div>
+<<<<<<< HEAD
+</div>
+
+<!-- ══ SECTIONS IA (cachées jusqu'à l'analyse) ══ -->
+
+<!-- Analyse technique + Port -->
+<div class="g2 ai-section" id="section-tech">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">ANALYSE TECHNIQUE IA</span></div>
+    <div class="panel-body"><div class="tblock" id="ai-technique"></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">ANALYSE DU PORT CIBLÉ — :{{ ctx.dst_port }}</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">SERVICE</span><span class="dv warn">{{ ctx.port_service }}</span></div>
+      <div class="tblock" id="ai-port" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MITRE + Corrélation -->
+<div class="g2 ai-section" id="section-mitre">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">MITRE ATT&CK FRAMEWORK</span></div>
+    <div class="panel-body">
+      {% if ctx.mitre %}
+      <div class="mitre-box">
+        <div class="mitre-tactic">TACTIQUE</div>
+        <div class="mitre-tech">{{ ctx.mitre.tactic }}</div>
+        <div class="mitre-tactic" style="margin-top:8px;">TECHNIQUE</div>
+        <div class="mitre-tech">{{ ctx.mitre.technique }}</div>
+        <div class="mitre-desc">{{ ctx.mitre.description }}</div>
+      </div>
+      {% endif %}
+      <div class="tblock" id="ai-mitre"></div>
+      <div id="ai-refs" style="margin-top:10px;"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">CORRÉLATION & PATTERNS</span></div>
+    <div class="panel-body">
+      <div class="dr"><span class="dk">PROBABILITÉ FAUX POSITIF</span><span class="dv muted" id="ai-fp"></span></div>
+      <div class="tblock" id="ai-correlation" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CVE Details -->
+<div class="panel ai-section" id="section-cve" style="margin-bottom:12px;display:none;">
+  <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">DÉTAILS CVE & VULNÉRABILITÉS</span></div>
+  <div class="panel-body"><div class="tblock" id="ai-cve"></div></div>
+</div>
+
+<!-- Recommandations -->
+<div class="panel ai-section" id="section-reco" style="margin-bottom:12px;">
+  <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">PLAN DE RÉPONSE — RECOMMANDATIONS PRIORISÉES</span></div>
+  <div class="panel-body" id="ai-reco-body"></div>
+</div>
+
+<!-- IOC + Commandes -->
+<div class="g2 ai-section" id="section-ioc">
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">INDICATEURS DE COMPROMISSION (IOC)</span></div>
+    <div class="panel-body" id="ai-ioc-body"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">COMMANDES D'INVESTIGATION</span></div>
+    <div class="panel-body" style="padding:10px;" id="ai-cmd-body"></div>
+  </div>
+</div>
+
+<!-- Historiques -->
+{% if ip_history %}
+<div class="panel" style="margin-bottom:12px;">
+  <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">HISTORIQUE IP SOURCE — {{ src_ip }} ({{ ip_history | length }} alertes)</span></div>
+  <div class="panel-body" style="padding:0;">
+    <table class="htable">
+      <thead><tr><th>TIMESTAMP</th><th>RÈGLE</th><th>DESCRIPTION</th><th>NIV.</th></tr></thead>
+      <tbody>
+        {% for h in ip_history %}
+        <tr>
+          <td>{{ h.get('timestamp','N/A')[:19] }}</td>
+          <td style="color:var(--cyan)">{{ h.get('rule',{}).get('id','—') }}</td>
+          <td>{{ h.get('rule',{}).get('description','—') }}</td>
+          <td>{% set lv = h.get('rule',{}).get('level',0)|int %}<span class="chip {% if lv>=10 %}high{% elif lv>=6 %}med{% else %}low{% endif %}">{{ lv }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="panel" style="margin-bottom:12px;">
+  <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">HISTORIQUE AGENT — {{ alert.get('agent',{}).get('name','') }} ({{ agent_history | length }} alertes)</span></div>
+  <div class="panel-body" style="padding:0;">
+    {% if agent_history %}
+    <table class="htable">
+      <thead><tr><th>TIMESTAMP</th><th>RÈGLE</th><th>DESCRIPTION</th><th>NIV.</th></tr></thead>
+      <tbody>
+        {% for h in agent_history %}
+        <tr>
+          <td>{{ h.get('timestamp','N/A')[:19] }}</td>
+          <td style="color:var(--cyan)">{{ h.get('rule',{}).get('id','—') }}</td>
+          <td>{{ h.get('rule',{}).get('description','—') }}</td>
+          <td>{% set lv = h.get('rule',{}).get('level',0)|int %}<span class="chip {% if lv>=10 %}high{% elif lv>=6 %}med{% else %}low{% endif %}">{{ lv }}</span></td>
+=======
+
+</div>
+
+<!-- ROW 3 : Historique -->
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-hdr-dot"></div>
+    <span class="panel-hdr-txt">HISTORIQUE ALERTES // {{ alert.get('agent', {}).get('name', 'AGENT') }} — 10 DERNIÈRES</span>
+  </div>
+  <div class="panel-body" style="padding:0;">
+    {% if history %}
+    <table class="htable">
+      <thead><tr><th>TIMESTAMP</th><th>ID RÈGLE</th><th>DESCRIPTION</th><th>NIV.</th></tr></thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td>{{ h.get('timestamp', 'N/A')[:19] }}</td>
+          <td style="color:var(--cyan)">{{ h.get('rule', {}).get('id', '—') }}</td>
+          <td>{{ h.get('rule', {}).get('description', '—') }}</td>
+          <td>{% set lv = h.get('rule', {}).get('level', 0) | int %}
+            <span class="chip {% if lv>=10 %}high{% elif lv>=6 %}med{% else %}low{% endif %}">{{ lv }}</span>
+          </td>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+<<<<<<< HEAD
+    <div class="empty">AUCUN HISTORIQUE DISPONIBLE</div>
+=======
+    <div class="empty">AUCUN HISTORIQUE DISPONIBLE POUR CET AGENT</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+    {% endif %}
+  </div>
+</div>
+
+<<<<<<< HEAD
+{% if ctx.full_log %}
+<div class="panel">
+  <div class="panel-hdr"><div class="panel-hdr-dot"></div><span class="panel-hdr-txt">LOG BRUT COMPLET</span></div>
+  <div class="panel-body" style="padding:0;">
+    <div style="padding:12px;background:#0a0f18;font-size:9px;color:#5a8a6a;font-family:var(--mono);word-break:break-all;line-height:1.8;">{{ ctx.full_log }}</div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ALERT_ID = "{{ alert_id }}";
+const NIVEAU_COLORS = {
+  "CRITIQUE": "#ff1744",
+  "ELEVE":    "#ff9100",
+  "MOYEN":    "#ffd600",
+  "FAIBLE":   "#00e676",
+  "INCONNU":  "#00e5ff"
+};
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el && val) el.textContent = val;
+}
+
+function setHTML(id, val) {
+  const el = document.getElementById(id);
+  if (el && val) el.innerHTML = val;
+}
+
+function showAISections() {
+  document.querySelectorAll('.ai-section').forEach(el => el.style.display = 'grid');
+  document.getElementById('section-reco').style.display = 'block';
+  document.getElementById('section-ioc').style.display  = 'grid';
+}
+
+function applyAIResult(data) {
+  const niveau = (data.niveau_danger || "INCONNU").toUpperCase();
+  const color  = NIVEAU_COLORS[niveau] || "#00e5ff";
+
+  // Verdict box
+  const box = document.getElementById('verdict-box');
+  box.className = 'verdict ' + niveau;
+
+  document.getElementById('ai-niveau').textContent = niveau;
+  document.getElementById('ai-niveau').style.color = color;
+  document.getElementById('ai-score').textContent  = data.score_risque || 0;
+  document.getElementById('ai-score').style.color  = color;
+  document.getElementById('ai-conf').textContent   = 'CONFIANCE ' + (data.confiance_analyse || 0) + '%';
+
+  document.getElementById('ai-loading-indicator').style.display = 'none';
+  document.getElementById('ai-content').style.display = 'block';
+  setText('ai-type',   data.type_attaque || '');
+  setText('ai-resume', data.resume_executif || '');
+  const recoP1 = (data.recommandations || {}).immediat_P1 || '';
+  setText('ai-action', recoP1);
+
+  // Sections détaillées
+  setText('ai-technique',   data.analyse_technique || '');
+  setText('ai-port',        data.analyse_port || '');
+  setText('ai-geo',         data.analyse_geographique || '');
+  setText('ai-mitre',       data.mitre_analyse || '');
+  setText('ai-fp',          data.faux_positif || '');
+  setText('ai-correlation', data.correlation || '');
+
+  // Références
+  if (data.references && data.references.length) {
+    const refsHtml = data.references.map(r => `<div style="font-size:8px;color:var(--txt3);padding:3px 0;border-bottom:1px solid var(--edge);">→ ${r}</div>`).join('');
+    setHTML('ai-refs', refsHtml);
+  }
+
+  // Recommandations
+  const reco = data.recommandations || {};
+  const recoItems = [
+    {key: 'immediat_P1',    cls: 'reco-p1', label: '⚡ P1 — IMMÉDIAT (15 minutes)'},
+    {key: 'court_terme_P2', cls: 'reco-p2', label: '🔶 P2 — COURT TERME (24 heures)'},
+    {key: 'moyen_terme_P3', cls: 'reco-p3', label: '🔷 P3 — MOYEN TERME (1 semaine)'},
+    {key: 'long_terme_P4',  cls: 'reco-p4', label: '🟢 P4 — LONG TERME (structurel)'},
+  ];
+  let recoHtml = '';
+  recoItems.forEach(item => {
+    if (reco[item.key]) {
+      recoHtml += `<div class="reco-item ${item.cls}"><div class="reco-label">${item.label}</div><div class="reco-text">${reco[item.key]}</div></div>`;
+    }
+  });
+  setHTML('ai-reco-body', recoHtml);
+
+  // IOC
+  const iocs = data.ioc || [];
+  if (iocs.length) {
+    setHTML('ai-ioc-body', iocs.map(i => `<span class="ioc-tag">${i}</span>`).join(''));
+  } else {
+    setHTML('ai-ioc-body', '<div class="empty">AUCUN IOC IDENTIFIÉ</div>');
+  }
+
+  // Commandes
+  // CVE Details (nouveau champ)
+  if (data.cve_details && data.cve_details !== 'N/A') {
+    const cveEl = document.getElementById('ai-cve');
+    if (cveEl) { cveEl.textContent = data.cve_details; document.getElementById('section-cve').style.display = 'block'; }
+  }
+
+  // Commandes investigation
+  const cmds = data.commandes_investigation || data.commandes_utiles || [];
+  if (cmds.length) {
+    setHTML('ai-cmd-body', cmds.map(c => `<div class="cmd-block">${c}</div>`).join(''));
+  } else {
+    setHTML('ai-cmd-body', '<div class="empty">AUCUNE COMMANDE SUGGÉRÉE</div>');
+  }
+
+  // Afficher toutes les sections IA
+  showAISections();
+  document.getElementById('ai-geo').style.display = 'block';
+}
+
+// Polling toutes les 5 secondes
+let pollCount = 0;
+function pollAI() {
+  pollCount++;
+  fetch('/api/ai_status/' + encodeURIComponent(ALERT_ID))
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'done') {
+        applyAIResult(data);
+      } else if (data.status === 'error') {
+        document.getElementById('ai-loading-indicator').innerHTML =
+          '<div style="color:var(--hot);font-size:9px;letter-spacing:0.15em;">❌ ERREUR IA — ' + (data.message || 'Timeout') + '</div>';
+      } else {
+        // Encore en cours — continuer le polling (max 24 fois = 2 minutes)
+        if (pollCount < 24) {
+          setTimeout(pollAI, 5000);
+        } else {
+          document.getElementById('ai-loading-indicator').innerHTML =
+            '<div style="color:var(--warn);font-size:9px;letter-spacing:0.15em;">⚠ TIMEOUT — Le modèle a mis trop de temps. Rafraîchissez la page.</div>';
+        }
+      }
+    })
+    .catch(() => {
+      if (pollCount < 24) setTimeout(pollAI, 5000);
+    });
+}
+
+// Démarre le polling après 3 secondes
+setTimeout(pollAI, 3000);
+</script>
+=======
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+{% endblock %}

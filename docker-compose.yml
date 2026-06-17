@@ -1,0 +1,110 @@
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ocii-iris-ollama
+    restart: unless-stopped
+    ports:
+<<<<<<< HEAD
+      - "127.0.0.1:11434:11434"   # LAN-only, pas d'exposition externe
+=======
+      - "11434:11434"
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+<<<<<<< HEAD
+    networks:
+      - ocii-iris-network
+
+  nginx:
+    build: ./nginx
+    container_name: ocii-iris-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - ocii-iris
+    networks:
+      - ocii-iris-network
+=======
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+
+  ocii-iris:
+    build: .
+    container_name: ocii-iris-app
+    restart: unless-stopped
+<<<<<<< HEAD
+    # Port 5000 interne uniquement — plus exposé vers l'extérieur
+    expose:
+      - "5000"
+    extra_hosts:
+      - "wazuh-host:192.168.0.95"
+    environment:
+      - WAZUH_HOST=${WAZUH_HOST:-192.168.0.95}
+      - WAZUH_PORT=${WAZUH_PORT:-55000}
+      - WAZUH_USER=${WAZUH_USER:-wazuh-wui}
+      - WAZUH_PASSWORD=${WAZUH_PASSWORD}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-120b}
+      - ABUSEIPDB_KEY=${ABUSEIPDB_KEY}
+      - VIRUSTOTAL_KEY=${VIRUSTOTAL_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - OS_PASSWORD=${OS_PASSWORD}
+      - OCII_API_TOKEN=${OCII_API_TOKEN:-snmp-internal-token}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+    depends_on:
+      - ollama
+    networks:
+      - ocii-iris-network
+
+  snmp-receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile.snmp
+    container_name: ocii-iris-snmp
+    restart: unless-stopped
+    ports:
+      - "162:162/udp"   # Écoute des traps SNMP depuis le LAN
+    environment:
+      - SNMP_LISTEN_ADDR=0.0.0.0
+      - SNMP_LISTEN_PORT=162
+      - SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
+      - OCII_IRIS_URL=http://ocii-iris:5000
+      - OCII_API_TOKEN=${OCII_API_TOKEN:-snmp-internal-token}
+      - SNMP_STARTUP_DELAY=10
+      - LOG_LEVEL=INFO
+    depends_on:
+      - ocii-iris
+    networks:
+      - ocii-iris-network
+
+networks:
+  ocii-iris-network:
+    driver: bridge
+=======
+    ports:
+      - "5000:5000"
+    extra_hosts:
+      - "wazuh-host:192.168.0.95"
+    environment:
+      - WAZUH_HOST=192.168.0.95
+      - WAZUH_PORT=55000
+      - WAZUH_USER=wazuh-wui
+      - WAZUH_PASSWORD=09fB4oB*SqUk3nr5X3kWFpAxFNQ*3MlQ
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=llama3.1:8b
+      - ABUSEIPDB_KEY=a7c0c86ba7675022f682ffdfee900538c67c76a8e10b2066ecf0b0d3f4887643b531a156154e37b6
+      - VIRUSTOTAL_06b03ca824114c1edfeaa90991f5d62f0b5c87e54194883781c85a55713d8322
+      - SECRET_KEY=ocii-iris-secret-changeme
+      - FLASK_ENV=development
+      - OS_PASSWORD=OciiAdmin2026
+    depends_on:
+      - ollama
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+
+volumes:
+  ollama_data:

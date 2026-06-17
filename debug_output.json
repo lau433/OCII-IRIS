@@ -1,0 +1,2 @@
+{"alert":{"_id":"F3Un0J4BTj6vm7APDTGJ","_index":"wazuh-alerts-4.x-2026.06.16"},"get_alert_by_id_no_index":{"agent":"admin-ocii-Virtual-Machine","found":true,"time_s":0.073},"get_alert_by_id_with_index":{"agent":"admin-ocii-Virtual-Machine","found":true,"time_s":0.109},"get_doc_direct":{"found":true,"status":200,"time_s":0.75}}
+DONE 

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCII-IRIS // ACCÈS SYSTÈME</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#02040a;--deep:#060c18;--panel:#080f1e;--edge:#0d1f3c;--wire:#1a3a6a;
+  --cyan:#00e5ff;--cyan2:#0097a7;--ice:#b3f0ff;--hot:#ff1744;--warn:#ff9100;--go:#00e676;
+  --dim:#1e3a5a;--muted:#2a4a72;--txt:#7ab3d4;--txt2:#3d6a8a;--txt3:#1a3a5a;
+  --mono:'IBM Plex Mono',monospace;--head:'Bebas Neue',sans-serif;--sans:'Space Grotesk',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--void);font-family:var(--mono);display:flex;align-items:center;justify-content:center;}
+#bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;}
+.hex-grid{
+  position:absolute;inset:-100px;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 29px,rgba(0,229,255,0.018) 29px,rgba(0,229,255,0.018) 30px),
+    repeating-linear-gradient(60deg,transparent,transparent 29px,rgba(0,229,255,0.018) 29px,rgba(0,229,255,0.018) 30px),
+    repeating-linear-gradient(120deg,transparent,transparent 29px,rgba(0,229,255,0.018) 29px,rgba(0,229,255,0.018) 30px);
+}
+.scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.12),rgba(0,229,255,0.35),rgba(0,229,255,0.12),transparent);animation:sweep 6s linear infinite;filter:blur(1px);}
+@keyframes sweep{from{top:-2px}to{top:100%}}
+.corner{position:absolute;width:70px;height:70px;}
+.corner::before,.corner::after{content:'';position:absolute;background:var(--cyan);}
+.corner::before{width:2px;height:100%;}
+.corner::after{width:100%;height:2px;}
+.tl{top:20px;left:20px;opacity:0.4;}.tl::before{top:0;left:0;}.tl::after{top:0;left:0;}
+.tr{top:20px;right:20px;opacity:0.4;}.tr::before{top:0;right:0;}.tr::after{top:0;right:0;}
+.bl{bottom:20px;left:20px;opacity:0.4;}.bl::before{bottom:0;left:0;}.bl::after{bottom:0;left:0;}
+.br{bottom:20px;right:20px;opacity:0.4;}.br::before{bottom:0;right:0;}.br::after{bottom:0;right:0;}
+.radar-wrap{position:absolute;right:8%;top:50%;transform:translateY(-50%);width:220px;height:220px;opacity:0.15;}
+.radar-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--cyan);}
+.radar-ring:nth-child(2){inset:25%;}.radar-ring:nth-child(3){inset:50%);}
+.radar-sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 340deg,rgba(0,229,255,0.4) 360deg);animation:radarspin 4s linear infinite;}
+@keyframes radarspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.radar-cross{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.radar-cross::before,.radar-cross::after{content:'';position:absolute;background:rgba(0,229,255,0.25);}
+.radar-cross::before{width:100%;height:1px;}.radar-cross::after{width:1px;height:100%;}
+.side-panel{position:absolute;left:5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;opacity:0.2;}
+.srow{font-size:8px;color:var(--cyan);letter-spacing:0.15em;display:flex;gap:8px;align-items:center;}
+.srow-bar{width:80px;height:2px;background:var(--dim);position:relative;overflow:hidden;}
+.srow-bar::after{content:'';position:absolute;top:0;left:0;height:100%;background:var(--cyan);animation:barfill 3s ease-in-out infinite alternate;}
+@keyframes barfill{from{width:20%}to{width:90%}}
+.card{position:relative;z-index:10;width:460px;background:var(--deep);border:1px solid var(--wire);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));animation:cardIn 0.8s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes cardIn{from{opacity:0;transform:scale(0.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.card::before{content:'';position:absolute;inset:-1px;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));background:linear-gradient(135deg,rgba(0,229,255,0.15),transparent 40%,transparent 60%,rgba(0,229,255,0.05));pointer-events:none;}
+.card-header{background:var(--panel);border-bottom:1px solid var(--wire);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;position:relative;flex-shrink:0;}
+.ring{position:absolute;border-radius:50%;border:1.5px solid var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);}
+.r1{width:100%;height:100%;opacity:0.3;}.r2{width:66%;height:66%;opacity:0.6;animation:rpulse 2s ease-in-out infinite;}.r3{width:33%;height:33%;opacity:1;}
+.dot-center{position:absolute;width:5px;height:5px;background:var(--cyan);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--cyan);}
+@keyframes rpulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
+.logo-text{display:flex;flex-direction:column;}
+.logo-main{font-family:var(--head);font-size:22px;letter-spacing:0.15em;color:var(--cyan);line-height:1;}
+.logo-sub{font-size:7px;letter-spacing:0.25em;color:var(--txt2);margin-top:2px;}
+.header-status{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.status-dot{display:flex;align-items:center;gap:5px;font-size:7px;letter-spacing:0.2em;color:var(--go);}
+.dot-live{width:5px;height:5px;border-radius:50%;background:var(--go);box-shadow:0 0 6px var(--go);animation:livepulse 1.5s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{box-shadow:0 0 4px var(--go)}50%{box-shadow:0 0 10px var(--go)}}
+.header-time{font-size:7px;color:var(--txt3);letter-spacing:0.1em;}
+.card-body{padding:28px 28px 24px;}
+.section-lbl{font-size:7px;letter-spacing:0.35em;color:var(--txt3);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--edge);}
+.error{background:rgba(255,23,68,0.07);border:1px solid rgba(255,23,68,0.25);border-left:3px solid var(--hot);padding:8px 12px;margin-bottom:20px;font-size:10px;color:var(--hot);letter-spacing:0.08em;}
+.field{margin-bottom:18px;}
+.field-label{display:block;font-size:7px;letter-spacing:0.3em;color:var(--txt3);margin-bottom:7px;}
+input[type=text],input[type=password]{width:100%;background:rgba(0,229,255,0.02);border:none;border-bottom:1px solid var(--dim);padding:10px 0;font-family:var(--mono);font-size:13px;color:var(--ice);letter-spacing:0.08em;outline:none;transition:border-color 0.2s;}
+input[type=text]:focus,input[type=password]:focus{border-bottom-color:var(--cyan);background:rgba(0,229,255,0.03);}
+input::placeholder{color:var(--txt3);font-size:11px;}
+.remember{display:flex;align-items:center;gap:8px;margin-bottom:24px;cursor:pointer;user-select:none;}
+.remember input{display:none;}
+.check-box{width:14px;height:14px;border:1px solid var(--dim);display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.remember input:checked+.check-box{border-color:var(--cyan);background:rgba(0,229,255,0.12);}
+.remember input:checked+.check-box::after{content:'✓';font-size:9px;color:var(--cyan);}
+.remember-txt{font-size:8px;letter-spacing:0.2em;color:var(--txt3);}
+.btn-submit{width:100%;background:transparent;border:1px solid var(--cyan);padding:14px;font-family:var(--head);font-size:18px;letter-spacing:0.3em;color:var(--cyan);cursor:pointer;position:relative;overflow:hidden;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:color 0.2s;}
+.btn-submit::before{content:'';position:absolute;inset:0;background:var(--cyan);transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);}
+.btn-submit:hover{color:var(--void);}.btn-submit:hover::before{transform:translateX(0);}
+.btn-submit span{position:relative;z-index:1;}
+.card-footer{border-top:1px solid var(--edge);padding:10px 28px;display:flex;justify-content:space-between;align-items:center;}
+.footer-txt{font-size:7px;letter-spacing:0.15em;color:var(--txt3);}
+.footer-badge{font-size:7px;letter-spacing:0.2em;color:var(--txt3);border:1px solid var(--edge);padding:2px 8px;}
+.progress-bar{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--void),var(--cyan),var(--void));background-size:200% 100%;animation:progress 3s linear infinite;}
+@keyframes progress{from{background-position:100% 0}to{background-position:-100% 0}}
+</style>
+</head>
+<body>
+<div class="progress-bar"></div>
+<div id="bg">
+  <div class="hex-grid"></div>
+  <div class="scan"></div>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div class="radar-wrap">
+    <div class="radar-ring"></div><div class="radar-ring"></div><div class="radar-ring"></div>
+    <div class="radar-sweep"></div><div class="radar-cross"></div>
+  </div>
+  <div class="side-panel">
+    <div class="srow">THR_LEVEL<div class="srow-bar"></div></div>
+    <div class="srow">NET_LOAD <div class="srow-bar" style="animation-delay:.4s"></div></div>
+    <div class="srow">EVT_RATE <div class="srow-bar" style="animation-delay:.8s"></div></div>
+    <div class="srow">CPU_UTIL <div class="srow-bar" style="animation-delay:1.2s"></div></div>
+    <div class="srow">MEM_USE  <div class="srow-bar" style="animation-delay:1.6s"></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="logo">
+      <div class="logo-mark">
+        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+        <div class="dot-center"></div>
+      </div>
+      <div class="logo-text">
+        <div class="logo-main">OCII-IRIS</div>
+        <div class="logo-sub">INTELLIGENT RESPONSE & INVESTIGATION SYSTEM</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot"><div class="dot-live"></div>SYSTÈME ACTIF</div>
+      <div class="header-time" id="clock">--:--:--</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="section-lbl">AUTHENTIFICATION REQUISE</div>
+    {% if error %}<div class="error">⚠ ERREUR — {{ error }}</div>{% endif %}
+    <form method="POST" action="/login">
+<<<<<<< HEAD
+      <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+=======
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+      <div class="field">
+        <label class="field-label">IDENTIFIANT OPÉRATEUR</label>
+        <input type="text" name="username" placeholder="login..." autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label class="field-label">CLÉ D'ACCÈS</label>
+        <input type="password" name="password" placeholder="••••••••••••" autocomplete="current-password" required>
+      </div>
+      <label class="remember">
+        <input type="checkbox" name="remember" value="1">
+        <div class="check-box"></div>
+        <span class="remember-txt">MAINTENIR LA SESSION — 30 JOURS</span>
+      </label>
+      <button type="submit" class="btn-submit"><span>ACCÉDER AU SYSTÈME</span></button>
+    </form>
+  </div>
+  <div class="card-footer">
+    <span class="footer-txt">OCII — OCÉAN INDIEN INFORMATIQUE</span>
+    <span class="footer-badge">ACCÈS RESTREINT</span>
+  </div>
+</div>
+<script>
+const clock=document.getElementById('clock');
+function tick(){const n=new Date();clock.textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');}
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>

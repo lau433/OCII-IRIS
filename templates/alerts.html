@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+{% block title %}OCII-IRIS // ALERTES{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.page-title{font-size:22px;font-weight:700;letter-spacing:0.04em;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.page-line{flex:1;height:1px;background:var(--border);}
+
+/* Time bar */
+.time-bar{display:flex;align-items:center;gap:10px;
+  background:var(--surface-1);border:1px solid var(--border);border-radius:8px;
+  padding:10px 18px;margin-bottom:14px;flex-wrap:wrap;}
+.time-label{font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-muted);flex-shrink:0;}
+.time-presets{display:flex;gap:4px;flex-wrap:wrap;}
+.tp{font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);
+  border:1px solid var(--border);padding:5px 12px;border-radius:6px;
+  cursor:pointer;background:none;transition:all var(--t-fast) var(--ease);font-family:var(--sans);}
+.tp:hover{color:var(--text);border-color:var(--border-hover);background:var(--surface-2);}
+.tp.active{color:var(--bg);background:var(--accent);border-color:var(--accent);font-weight:600;}
+.time-sep2{width:1px;height:22px;background:var(--border);margin:0 4px;}
+.custom-range{display:none;align-items:center;gap:8px;}
+.custom-range.open{display:flex;}
+.dt-input{font-family:var(--mono);font-size:11px;background:var(--surface-2);
+  border:1px solid var(--border);color:var(--text);padding:5px 10px;outline:none;
+  width:175px;border-radius:6px;transition:border-color var(--t-fast) var(--ease);}
+.dt-input:focus{border-color:var(--accent);}
+.btn-apply{font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--accent);
+  border:1px solid var(--accent);padding:5px 12px;cursor:pointer;background:none;
+  font-family:var(--sans);border-radius:6px;transition:all var(--t-fast) var(--ease);}
+.btn-apply:hover{background:var(--accent-glow);}
+.period-pill{font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--accent);
+  border:1px solid rgba(40,199,232,0.3);padding:4px 12px;border-radius:12px;
+  background:rgba(40,199,232,0.06);flex-shrink:0;}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap;}
+.filter-btn{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);
+  border:1px solid var(--border);padding:5px 14px;cursor:pointer;border-radius:6px;
+  background:none;transition:all var(--t-fast) var(--ease);
+}
+.filter-btn:hover{color:var(--text);border-color:var(--border-hover);background:var(--surface-2);}
+.filter-btn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+.filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.search-box{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.02em;
+  background:var(--surface-1);border:1px solid var(--border);color:var(--text);
+  padding:6px 12px;width:220px;outline:none;border-radius:6px;
+  transition:border-color var(--t-fast) var(--ease);
+}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--text-dim);}
+.result-count{font-size:11px;color:var(--text-dim);letter-spacing:0.04em;margin-left:auto;}
+.btn-refresh{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);
+  border:1px solid var(--border);padding:5px 14px;cursor:pointer;border-radius:6px;
+  background:none;transition:all var(--t-fast) var(--ease);
+}
+.btn-refresh:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+
+/* Table */
+.alerts-table{width:100%;border-collapse:collapse;}
+.alerts-table th{
+  font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text-dim);
+  border-bottom:1px solid var(--border);padding:10px 12px;text-align:left;
+  position:sticky;top:56px;background:var(--bg);z-index:10;
+}
+.alerts-table td{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  font-size:12px;color:var(--text-muted);
+}
+.alerts-table tr:hover td{background:var(--surface-1);cursor:pointer;}
+
+.lvl-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;font-family:var(--sans);font-size:14px;
+  border:1px solid;font-weight:700;border-radius:8px;
+}
+.lvl-crit{color:var(--danger);border-color:rgba(216,95,116,0.4);background:rgba(216,95,116,0.08);}
+.lvl-high{color:var(--warning);border-color:rgba(216,162,74,0.4);background:rgba(216,162,74,0.06);}
+.lvl-med{color:var(--warning);border-color:rgba(216,162,74,0.3);background:rgba(216,162,74,0.04);}
+.lvl-low{color:var(--text-dim);border-color:var(--border);}
+
+.desc-cell{max-width:380px;}
+.desc-text{color:var(--text);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.groups-text{font-size:10px;color:var(--text-dim);margin-top:2px;letter-spacing:0.02em;}
+
+.mono{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
+.agent-cell{font-family:var(--sans);font-size:12px;color:var(--text);font-weight:500;}
+
+.btn-inv{
+  font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--accent);
+  border:1px solid var(--accent);padding:4px 12px;border-radius:6px;
+  text-decoration:none;white-space:nowrap;display:inline-block;
+  transition:all var(--t-fast) var(--ease);
+}
+.btn-inv:hover{background:var(--accent-glow);}
+
+.ip-cell{font-family:var(--mono);font-size:11px;color:var(--text-muted);}
+
+.spin{display:inline-block;width:12px;height:12px;border:1.5px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;gap:10px;padding:30px 12px;
+  font-size:12px;color:var(--text-dim);letter-spacing:0.04em;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="page-title">FLUX ALERTES</div>
+    <div class="page-sub">OPENSEARCH TEMPS RÉEL — CLIQUER UNE LIGNE POUR INVESTIGUER</div>
+  </div>
+  <div class="page-line"></div>
+  <div style="font-size:8px;letter-spacing:0.15em;color:var(--txt3)" id="last-update">—</div>
+</div>
+
+<!-- Time range bar -->
+<div class="time-bar">
+  <div class="time-label">PÉRIODE</div>
+  <div class="time-presets">
+    <button class="tp" data-range="15m"  onclick="setRange('15m',this)">15 MIN</button>
+    <button class="tp" data-range="1h"   onclick="setRange('1h',this)">1 H</button>
+    <button class="tp" data-range="6h"   onclick="setRange('6h',this)">6 H</button>
+    <button class="tp active" data-range="24h" onclick="setRange('24h',this)">24 H</button>
+    <button class="tp" data-range="7d"   onclick="setRange('7d',this)">7 JOURS</button>
+    <button class="tp" data-range="30d"  onclick="setRange('30d',this)">30 JOURS</button>
+    <button class="tp" data-range="all"  onclick="setRange('all',this)">TOUT</button>
+    <button class="tp" data-range="custom" onclick="setRange('custom',this)">CUSTOM ▾</button>
+  </div>
+  <div class="custom-range" id="custom-range">
+    <span style="font-size:9px;color:var(--txt3);letter-spacing:0.15em">DE</span>
+    <input class="dt-input" type="datetime-local" id="dt-from" />
+    <span style="font-size:9px;color:var(--txt3);letter-spacing:0.15em">À</span>
+    <input class="dt-input" type="datetime-local" id="dt-to" />
+    <button class="btn-apply" onclick="applyCustom()">APPLIQUER</button>
+  </div>
+  <div class="time-sep2"></div>
+  <div class="period-pill" id="period-pill">Dernières 24 heures</div>
+</div>
+
+<div class="toolbar">
+  <button class="filter-btn active" onclick="setLevel(5, this)">TOUS (≥5)</button>
+  <button class="filter-btn"        onclick="setLevel(9, this)">ÉLEVÉS (≥9)</button>
+  <button class="filter-btn"        onclick="setLevel(12,this)">CRITIQUES (≥12)</button>
+  <div class="filter-sep"></div>
+  <input class="search-box" id="search-box" type="text" placeholder="RECHERCHER AGENT / DESC / IP..."
+    oninput="applySearch()">
+  <div class="filter-sep"></div>
+  <button class="btn-refresh" onclick="loadAlerts()">↻ ACTUALISER</button>
+  <div class="result-count" id="result-count">—</div>
+</div>
+
+<div style="overflow-x:clip;">
+  <table class="alerts-table">
+    <thead>
+      <tr>
+        <th>NIV</th>
+        <th>TIMESTAMP</th>
+        <th>AGENT</th>
+        <th>DESCRIPTION</th>
+        <th>IP SOURCE</th>
+        <th>ACTION</th>
+      </tr>
+    </thead>
+    <tbody id="alerts-tbody">
+      <tr><td colspan="6"><div class="loading"><div class="spin"></div>CHARGEMENT...</div></td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allAlerts    = [];
+let minLevel     = 5;
+let searchTerm   = '';
+let currentRange = '24h';
+let customFrom   = null;
+let customTo     = null;
+
+function toLocalISOString(d){
+  const p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+const RANGE_LABELS = {
+  '15m':'Dernières 15 min','1h':'Dernière heure','6h':'Dernières 6h',
+  '24h':'Dernières 24h','7d':'Derniers 7 jours','30d':'Derniers 30 jours',
+  'all':'Toutes périodes','custom':'Plage personnalisée',
+};
+
+function setRange(r, btn){
+  currentRange = r;
+  document.querySelectorAll('.tp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const cr = document.getElementById('custom-range');
+  if(r==='custom'){
+    cr.classList.add('open');
+    if(!document.getElementById('dt-from').value){
+      const now=new Date(), ago=new Date(now-86400000);
+      document.getElementById('dt-from').value=toLocalISOString(ago);
+      document.getElementById('dt-to').value=toLocalISOString(now);
+    }
+    return;
+  }
+  cr.classList.remove('open');
+  document.getElementById('period-pill').textContent = RANGE_LABELS[r]||r;
+  loadAlerts();
+}
+
+function localToISO(val){
+  /* datetime-local → ISO 8601 avec offset local (ex: 2026-06-17T16:00:00+04:00) */
+  const d=new Date(val);
+  const off=-d.getTimezoneOffset();
+  const sign=off>=0?'+':'-';
+  const hh=String(Math.floor(Math.abs(off)/60)).padStart(2,'0');
+  const mm=String(Math.abs(off)%60).padStart(2,'0');
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
+    +'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':00'+sign+hh+':'+mm;
+}
+function applyCustom(){
+  const f=document.getElementById('dt-from').value;
+  const t=document.getElementById('dt-to').value;
+  if(!f){alert('Veuillez saisir une date de début.');return;}
+  customFrom=localToISO(f);
+  customTo=t?localToISO(t):null;
+  const lbl=f.slice(0,16).replace('T',' ')+' → '+(t?t.slice(0,16).replace('T',' '):'maintenant');
+  document.getElementById('period-pill').textContent=lbl;
+  loadAlerts();
+}
+
+function alertsUrl(){
+  let u=`/api/alerts?min_level=${minLevel}&size=300&range=${currentRange}`;
+  if(currentRange==='custom'&&customFrom){
+    u+=`&from_ts=${encodeURIComponent(customFrom)}`;
+    if(customTo) u+=`&to_ts=${encodeURIComponent(customTo)}`;
+  }
+  return u;
+}
+
+function lvlClass(l){
+  if(l>=12) return 'lvl-crit';
+  if(l>=9)  return 'lvl-high';
+  if(l>=5)  return 'lvl-med';
+  return 'lvl-low';
+}
+
+function fmtTs(ts){
+  if(!ts) return '—';
+  try{
+    const d=new Date(ts);
+    return d.toLocaleString('fr-FR',{
+      day:'2-digit',month:'2-digit',
+      hour:'2-digit',minute:'2-digit',second:'2-digit'
+    });
+  }catch(e){return ts.slice(0,19).replace('T',' ');}
+}
+
+function setLevel(l, btn){
+  minLevel = l;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAlerts();
+}
+
+function applySearch(){
+  searchTerm = document.getElementById('search-box').value.toLowerCase();
+  renderTable();
+}
+
+function renderTable(){
+  const filtered = allAlerts.filter(a=>{
+    if(a.level < minLevel) return false;
+    if(!searchTerm) return true;
+    return (a.agent_name||'').toLowerCase().includes(searchTerm)
+        || (a.description||'').toLowerCase().includes(searchTerm)
+        || (a.src_ip||'').includes(searchTerm);
+  });
+
+  document.getElementById('result-count').textContent = filtered.length+' alertes';
+  const tbody = document.getElementById('alerts-tbody');
+
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="loading">AUCUNE ALERTE CORRESPONDANTE</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a=>`
+    <tr onclick="window.location='/investigate?alert_id=${a._id}&_index=${encodeURIComponent(a._index||'')}'">
+      <td><div class="lvl-badge ${lvlClass(a.level)}">${a.level}</div></td>
+      <td class="mono">${fmtTs(a.timestamp)}</td>
+      <td class="agent-cell">${a.agent_name||'—'}</td>
+      <td class="desc-cell">
+        <div class="desc-text">${a.description||'—'}</div>
+        <div class="groups-text">${(a.groups||[]).slice(0,3).join(' · ')}</div>
+      </td>
+      <td class="ip-cell">${a.src_ip||'—'}</td>
+      <td><a class="btn-inv" href="/investigate?alert_id=${a._id}&_index=${encodeURIComponent(a._index||'')}" onclick="event.stopPropagation()">ENQUÊTER</a></td>
+    </tr>
+  `).join('');
+}
+
+async function loadAlerts(){
+  const tbody = document.getElementById('alerts-tbody');
+  tbody.innerHTML='<tr><td colspan="6"><div class="loading"><div class="spin"></div>CHARGEMENT...</div></td></tr>';
+  try{
+    const res = await fetch(alertsUrl());
+    if(!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    allAlerts = data.alerts || [];
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      'MAJ: '+[now.getHours(),now.getMinutes(),now.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');
+    renderTable();
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="6"><div class="loading" style="color:var(--hot)">ERREUR: ${e.message}</div></td></tr>`;
+  }
+}
+
+loadAlerts();
+setInterval(loadAlerts, 30000);
+</script>
+{% endblock %}

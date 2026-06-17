@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% block title %}OCII-IRIS // AGENTS{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.page-title{font-size:22px;font-weight:700;letter-spacing:0.04em;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.page-line{flex:1;height:1px;background:var(--border);}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
+.filter-btn{
+  font-size:12px;font-weight:500;color:var(--text-dim);
+  border:1px solid var(--border);border-radius:6px;padding:6px 16px;cursor:pointer;
+  background:none;transition:all var(--t-fast) var(--ease);font-family:var(--sans);
+}
+.filter-btn:hover{color:var(--text);border-color:var(--border-hover);background:var(--surface-2);}
+.filter-btn.active{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);}
+.filter-sep{width:1px;height:20px;background:var(--border);}
+.filter-count{font-size:12px;color:var(--text-dim);margin-left:auto;}
+
+/* Table */
+.agents-table{width:100%;border-collapse:separate;border-spacing:0;}
+.agents-table th{
+  font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-dim);
+  border-bottom:1px solid var(--border);padding:10px 14px;text-align:left;
+  position:sticky;top:56px;background:var(--bg);z-index:10;
+}
+.agents-table td{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  font-size:13px;color:var(--text-muted);
+  transition:background var(--t-fast) var(--ease);
+}
+.agents-table tr.agent-row{cursor:pointer;}
+.agents-table tr.agent-row:hover td{background:var(--surface-2);}
+.agents-table tr.agent-row.expanded td{background:var(--surface-1);border-bottom-color:transparent;}
+
+.status-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:500;padding:4px 10px;border-radius:12px;
+}
+.pill-active{color:var(--success);background:rgba(54,217,138,0.1);}
+.pill-off{color:var(--danger);background:rgba(216,95,116,0.1);}
+
+.agent-dot-sm{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+.btn-inv{
+  font-size:11px;font-weight:500;color:var(--accent);
+  border:1px solid var(--accent);border-radius:6px;padding:5px 14px;
+  text-decoration:none;white-space:nowrap;
+  display:inline-block;transition:all var(--t-fast) var(--ease);
+}
+.btn-inv:hover{background:var(--accent-glow);}
+
+.agent-name-cell{font-size:13px;font-weight:600;color:var(--text);letter-spacing:0.01em;}
+.mono{font-family:var(--mono);font-size:12px;color:var(--text-muted);}
+
+/* OS badge */
+.os-badge{font-size:11px;color:var(--text-muted);
+  background:var(--surface-2);border-radius:4px;padding:3px 8px;}
+
+/* Expand chevron */
+.expand-icon{
+  display:inline-block;width:16px;height:16px;
+  color:var(--text-dim);transition:transform var(--t-fast) var(--ease);
+}
+.expanded .expand-icon{transform:rotate(180deg);}
+
+/* ── Detail panel ── */
+.detail-row{display:none;}
+.detail-row.open{display:table-row;}
+.detail-cell{padding:0 !important;border-bottom:1px solid var(--border) !important;background:var(--surface-1);}
+.detail-panel{
+  padding:20px 24px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  animation:fadeIn var(--t-base) var(--ease);
+}
+.detail-section-title{
+  font-size:11px;font-weight:600;letter-spacing:0.06em;
+  color:var(--text-dim);margin-bottom:10px;
+  padding-bottom:6px;border-bottom:1px solid var(--border);
+}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+.detail-label{font-size:11px;color:var(--text-dim);}
+.detail-value{font-size:12px;color:var(--text);font-weight:500;}
+.detail-value.mono{font-family:var(--mono);font-weight:400;}
+
+/* RAM bar */
+.ram-bar-bg{width:100%;height:6px;background:var(--surface-3);border-radius:3px;margin-top:4px;}
+.ram-bar-fill{height:100%;border-radius:3px;transition:width 0.4s var(--ease);}
+
+/* Skeleton in detail */
+.detail-skeleton{height:14px;width:80px;border-radius:3px;}
+
+/* Loading states */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;gap:10px;padding:30px 14px;
+  font-size:12px;color:var(--text-dim);}
+
+/* Table skeleton rows */
+.skeleton-row td{padding:14px !important;}
+.skel-block{border-radius:4px;display:inline-block;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="page-title">Agents Wazuh</div>
+    <div class="page-sub">Machines surveillées — cliquer pour détails Syscollector</div>
+  </div>
+  <div class="page-line"></div>
+  <div style="font-size:12px;color:var(--text-dim)" id="last-update">—</div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Tous</button>
+  <button class="filter-btn"        onclick="setFilter('active',this)">Actifs</button>
+  <button class="filter-btn"        onclick="setFilter('offline',this)">Hors ligne</button>
+  <div class="filter-sep"></div>
+  <div class="filter-count" id="count-label">— agents</div>
+</div>
+
+<div style="overflow-x:clip;">
+  <table class="agents-table">
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Statut</th>
+        <th>Machine</th>
+        <th>ID</th>
+        <th>Adresse IP</th>
+        <th>Système</th>
+        <th>Dernière activité</th>
+        <th>Version</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="agents-tbody">
+      <!-- Skeleton loading -->
+      <tr class="skeleton-row"><td colspan="9"><div class="loading"><div class="spin"></div>Chargement des agents…</div></td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allAgents = [];
+let currentFilter = 'all';
+let expandedAgent = null;
+const detailCache = {};
+
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  expandedAgent = null;
+  renderTable();
+}
+
+function fmtTs(ts){
+  if(!ts||ts==='N/A') return '—';
+  try{
+    const d=new Date(ts);
+    return d.toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }catch(e){return ts.slice(0,16);}
+}
+
+function osName(a){
+  const info = a.os||{};
+  const n = info.name||info.platform||'';
+  const v = info.version||info.major||'';
+  if(!n) return '—';
+  return (n + (v ? ' '+v : '')).trim();
+}
+
+function toggleDetail(agentId, row){
+  if(expandedAgent === agentId){
+    expandedAgent = null;
+    renderTable();
+    return;
+  }
+  expandedAgent = agentId;
+  renderTable();
+  loadAgentDetail(agentId);
+}
+
+async function loadAgentDetail(agentId){
+  const panel = document.getElementById('detail-content-'+agentId);
+  if(!panel) return;
+
+  // Show skeleton
+  panel.innerHTML = buildDetailSkeleton();
+
+  // Check cache
+  if(detailCache[agentId]){
+    renderDetail(agentId, detailCache[agentId]);
+    return;
+  }
+
+  try{
+    const res = await fetch('/api/agent_details/'+agentId);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    detailCache[agentId] = data;
+    renderDetail(agentId, data);
+  }catch(e){
+    panel.innerHTML = `<div style="padding:16px;color:var(--danger);font-size:12px">Erreur: ${e.message}</div>`;
+  }
+}
+
+function buildDetailSkeleton(){
+  return `
+    <div class="detail-panel">
+      <div><div class="detail-section-title">Système</div>
+        <div class="detail-grid">
+          ${[...Array(4)].map(()=>`<div class="detail-label skeleton detail-skeleton"></div><div class="detail-value skeleton detail-skeleton" style="width:100px"></div>`).join('')}
+        </div>
+      </div>
+      <div><div class="detail-section-title">Hardware</div>
+        <div class="detail-grid">
+          ${[...Array(4)].map(()=>`<div class="detail-label skeleton detail-skeleton"></div><div class="detail-value skeleton detail-skeleton" style="width:100px"></div>`).join('')}
+        </div>
+      </div>
+      <div><div class="detail-section-title">Agent</div>
+        <div class="detail-grid">
+          ${[...Array(3)].map(()=>`<div class="detail-label skeleton detail-skeleton"></div><div class="detail-value skeleton detail-skeleton" style="width:100px"></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDetail(agentId, data){
+  const panel = document.getElementById('detail-content-'+agentId);
+  if(!panel) return;
+
+  const ag = data.agent || {};
+  const os = data.os || {};
+  const hw = data.hardware || {};
+
+  const ramPct = hw.ram_usage_pct || 0;
+  const ramColor = ramPct > 85 ? 'var(--danger)' : ramPct > 60 ? 'var(--warning)' : 'var(--success)';
+
+  panel.innerHTML = `
+    <div class="detail-panel">
+      <div>
+        <div class="detail-section-title">Système</div>
+        <div class="detail-grid">
+          <div class="detail-label">Hostname</div>
+          <div class="detail-value">${os.hostname || ag.name || '—'}</div>
+          <div class="detail-label">OS</div>
+          <div class="detail-value">${os.os_name || ag.os_name || '—'}</div>
+          <div class="detail-label">Version</div>
+          <div class="detail-value mono">${os.os_version || ag.os_version || '—'}</div>
+          <div class="detail-label">Architecture</div>
+          <div class="detail-value mono">${os.architecture || '—'}</div>
+          ${os.os_release ? `<div class="detail-label">Kernel</div><div class="detail-value mono">${os.os_release}</div>` : ''}
+        </div>
+      </div>
+      <div>
+        <div class="detail-section-title">Hardware</div>
+        <div class="detail-grid">
+          <div class="detail-label">CPU</div>
+          <div class="detail-value">${hw.cpu_name || '—'}</div>
+          <div class="detail-label">Coeurs</div>
+          <div class="detail-value">${hw.cpu_cores || '—'}</div>
+          <div class="detail-label">Fréquence</div>
+          <div class="detail-value mono">${hw.cpu_mhz ? hw.cpu_mhz+' MHz' : '—'}</div>
+          <div class="detail-label">RAM totale</div>
+          <div class="detail-value">${hw.ram_total_gb ? hw.ram_total_gb+' Go' : '—'}</div>
+          ${hw.ram_total_gb ? `
+          <div class="detail-label">RAM libre</div>
+          <div class="detail-value">${hw.ram_free_gb} Go (${(100-ramPct).toFixed(0)}% libre)</div>
+          <div class="detail-label" style="grid-column:1/-1">Utilisation RAM</div>
+          <div style="grid-column:1/-1">
+            <div class="ram-bar-bg"><div class="ram-bar-fill" style="width:${ramPct}%;background:${ramColor}"></div></div>
+          </div>` : ''}
+        </div>
+      </div>
+      <div>
+        <div class="detail-section-title">Agent Wazuh</div>
+        <div class="detail-grid">
+          <div class="detail-label">ID</div>
+          <div class="detail-value mono">${String(ag.id||'').padStart(3,'0')}</div>
+          <div class="detail-label">Adresse IP</div>
+          <div class="detail-value mono">${ag.ip || '—'}</div>
+          <div class="detail-label">Groupes</div>
+          <div class="detail-value">${(ag.group||[]).join(', ') || '—'}</div>
+          <div class="detail-label">Ajouté le</div>
+          <div class="detail-value mono">${fmtTs(ag.date_add)}</div>
+          <div class="detail-label">Dernier keepalive</div>
+          <div class="detail-value mono">${fmtTs(ag.last_keep_alive)}</div>
+          ${hw.board_serial ? `<div class="detail-label">Série carte</div><div class="detail-value mono">${hw.board_serial}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderTable(){
+  const filtered = currentFilter==='all' ? allAgents
+    : currentFilter==='active' ? allAgents.filter(a=>a.status==='active')
+    : allAgents.filter(a=>a.status!=='active');
+
+  document.getElementById('count-label').textContent = filtered.length+' agents';
+
+  const tbody = document.getElementById('agents-tbody');
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="9"><div class="loading">Aucun agent</div></td></tr>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(a=>{
+    const isActive = a.status==='active';
+    const pillCls  = isActive?'pill-active':'pill-off';
+    const dotColor = isActive?'var(--success)':'var(--danger)';
+    const label    = isActive?'Actif':'Hors ligne';
+    const isExpanded = expandedAgent === a.id;
+
+    html += `
+      <tr class="agent-row ${isExpanded?'expanded':''}" onclick="toggleDetail('${a.id}',this)">
+        <td>
+          <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </td>
+        <td>
+          <span class="status-pill ${pillCls}">
+            <span class="agent-dot-sm" style="background:${dotColor}"></span>
+            ${label}
+          </span>
+        </td>
+        <td class="agent-name-cell">${a.name||'—'}</td>
+        <td><span class="mono">${String(a.id||'').padStart(3,'0')}</span></td>
+        <td><span class="mono">${a.ip||'—'}</span></td>
+        <td><span class="os-badge">${osName(a)}</span></td>
+        <td class="mono">${fmtTs(a.lastKeepAlive||a.last_keepalive)}</td>
+        <td class="mono">${a.version||'—'}</td>
+        <td>
+          <a class="btn-inv" href="/investigate/agent?name=${encodeURIComponent(a.name)}" onclick="event.stopPropagation()">Enquêter</a>
+        </td>
+      </tr>
+      <tr class="detail-row ${isExpanded?'open':''}">
+        <td colspan="9" class="detail-cell">
+          <div id="detail-content-${a.id}"></div>
+        </td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+
+  // Load detail if expanded
+  if(expandedAgent){
+    loadAgentDetail(expandedAgent);
+  }
+}
+
+async function loadAgents(){
+  try{
+    const res = await fetch('/api/agents');
+    if(!res.ok) throw new Error(res.status);
+    allAgents = await res.json();
+    allAgents.sort((a,b)=>{
+      if(a.status==='active' && b.status!=='active') return -1;
+      if(a.status!=='active' && b.status==='active') return 1;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      'MAJ '+[now.getHours(),now.getMinutes()].map(x=>String(x).padStart(2,'0')).join(':');
+    renderTable();
+  }catch(e){
+    document.getElementById('agents-tbody').innerHTML=
+      `<tr><td colspan="9"><div class="loading" style="color:var(--danger)">Erreur: ${e.message}</div></td></tr>`;
+  }
+}
+
+loadAgents();
+setInterval(loadAgents, 60000);
+</script>
+{% endblock %}

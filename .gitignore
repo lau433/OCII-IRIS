@@ -1,0 +1,41 @@
+# ── Secrets ──
+.env
+*.env
+.env.*
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# ── Docker ──
+ollama_data/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── Nginx SSL (généré au build) ──
+nginx/ssl/
+*.key
+*.crt
+*.pem
+
+# ── Logs ──
+*.log
+
+# ── Cache ──
+.cache/

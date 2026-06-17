@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+<<<<<<< HEAD
+{% block title %}OCII-IRIS // DASHBOARD{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══ TIME RANGE BAR ══ */
+.time-bar {
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface-1); border:1px solid var(--border); border-radius:8px;
+  padding:12px 20px; margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.time-label { font-size:12px; font-weight:600; color:var(--text-dim); flex-shrink:0; }
+.time-presets { display:flex; gap:4px; flex-wrap:wrap; }
+.tp {
+  font-size:12px; font-weight:500; color:var(--text-dim);
+  border:1px solid var(--border); border-radius:6px; padding:5px 14px;
+  cursor:pointer; background:none; transition:all var(--t-fast) var(--ease); font-family:var(--sans);
+}
+.tp:hover  { color:var(--text); border-color:var(--border-hover); background:var(--surface-2); }
+.tp.active { color:var(--bg); background:var(--accent); border-color:var(--accent); font-weight:600; }
+.time-sep  { width:1px; height:24px; background:var(--border); margin:0 4px; flex-shrink:0; }
+
+/* Custom range */
+.custom-range { display:none; align-items:center; gap:8px; }
+.custom-range.open { display:flex; }
+.dt-input {
+  font-family:var(--mono); font-size:12px;
+  background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:6px;
+  padding:6px 10px; outline:none; width:185px;
+}
+.dt-input:focus { border-color:var(--accent); }
+.btn-apply {
+  font-size:12px; font-weight:500; color:var(--accent);
+  border:1px solid var(--accent); border-radius:6px; padding:5px 14px;
+  cursor:pointer; background:none; transition:all var(--t-fast) var(--ease); font-family:var(--sans);
+}
+.btn-apply:hover { background:var(--accent-glow); }
+
+/* Auto-refresh */
+.refresh-group { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.refresh-label { font-size:11px; font-weight:500; color:var(--text-dim); }
+.rr { font-size:11px; color:var(--text-dim);
+  border:1px solid var(--border); border-radius:6px; padding:4px 10px;
+  cursor:pointer; background:none; transition:all var(--t-fast) var(--ease); font-family:var(--sans); }
+.rr:hover  { color:var(--text); border-color:var(--border-hover); }
+.rr.active { color:var(--success); border-color:var(--success); background:rgba(54,217,138,0.08); }
+
+/* Period display */
+.period-pill {
+  font-size:11px; font-weight:500; color:var(--accent);
+  border:1px solid rgba(40,199,232,0.25); border-radius:6px; padding:4px 12px;
+  background:var(--accent-glow); flex-shrink:0;
+}
+
+/* ══ LAYOUT ══ */
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+.dash-main  { display:grid; grid-template-columns:1fr 340px; gap:16px; margin-bottom:22px; }
+
+/* ══ STAT CARD ══ */
+.stat-card {
+  background:var(--surface-1); border:1px solid var(--border); border-radius:10px;
+  padding:22px 24px 18px; position:relative; overflow:hidden;
+  transition:border-color var(--t-fast) var(--ease);
+}
+.stat-card:hover{border-color:var(--border-hover);}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:var(--accent,var(--accent)); border-radius:10px 10px 0 0; opacity:0.6;
+}
+.stat-label { font-size:12px; font-weight:500; color:var(--text-dim); margin-bottom:8px; }
+.stat-val   { font-family:var(--sans); font-size:44px; font-weight:700;
+              color:var(--accent,var(--accent)); line-height:1; }
+.stat-sub   { font-size:11px; color:var(--text-dim); margin-top:8px; }
+
+/* ══ SECTION HEADER ══ */
+.sec-head  { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.sec-title { font-size:16px; font-weight:700; color:var(--text-muted); }
+.sec-badge { font-size:11px; font-weight:500; color:var(--text-dim);
+             border:1px solid var(--border); border-radius:6px; padding:3px 10px; }
+.sec-line  { flex:1; height:1px; background:var(--border); }
+.sec-link  { font-size:12px; font-weight:500; color:var(--text-dim);
+             text-decoration:none; border:1px solid var(--border); border-radius:6px; padding:5px 14px;
+             transition:all var(--t-fast) var(--ease); white-space:nowrap; }
+.sec-link:hover { color:var(--accent); border-color:var(--accent); }
+
+/* ══ ALERT FEED ══ */
+.alert-feed  { display:flex; flex-direction:column; gap:6px; }
+.alert-row   {
+  background:var(--surface-1); border:1px solid var(--border); border-radius:8px;
+  padding:14px 18px; display:grid;
+  grid-template-columns:44px 1fr auto auto;
+  align-items:center; gap:16px;
+  cursor:pointer; transition:all var(--t-fast) var(--ease); text-decoration:none;
+}
+.alert-row:hover { border-color:var(--border-hover); background:var(--surface-2); }
+.a-crit { border-left:3px solid var(--danger); }
+.a-high { border-left:3px solid var(--warning); }
+.a-med  { border-left:3px solid var(--warning); }
+.alert-lvl { font-size:24px; font-weight:700; text-align:center; line-height:1; }
+.c-crit { color:var(--danger); }
+.c-high { color:var(--warning); }
+.c-med  { color:var(--warning); }
+.c-low  { color:var(--text-dim); }
+.alert-desc { font-size:13px; color:var(--text); font-weight:500;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+.alert-meta { font-size:11px; color:var(--text-dim); }
+.alert-ip   { font-family:var(--mono); font-size:12px; color:var(--text-muted); }
+.btn-inv    { font-size:11px; font-weight:500; color:var(--accent);
+  border:1px solid var(--accent); border-radius:6px; padding:6px 16px;
+  text-decoration:none; white-space:nowrap; transition:all var(--t-fast) var(--ease); }
+.btn-inv:hover { background:var(--accent-glow); }
+
+/* ══ RIGHT PANEL ══ */
+.right-col { display:flex; flex-direction:column; gap:16px; }
+.panel { background:var(--surface-1); border:1px solid var(--border); border-radius:8px; padding:18px 20px; }
+.summary-row { display:flex; align-items:center; justify-content:space-between;
+  padding:9px 0; border-bottom:1px solid var(--border); }
+.summary-row:last-child { border-bottom:none; }
+.summary-key { font-size:11px; font-weight:500; color:var(--text-dim); }
+.summary-val { font-size:22px; font-weight:700; }
+.summary-txt { font-size:12px; }
+.offline-item { font-size:12px; color:var(--danger); padding:4px 0;
+  display:flex; align-items:center; gap:8px; }
+.offline-item::before { content:'●'; font-size:6px; }
+
+/* ══ AGENTS GRID ══ */
+.agents-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(185px,1fr)); gap:10px; }
+.agent-card  { background:var(--surface-1); border:1px solid var(--border); border-radius:8px;
+  padding:14px 16px; cursor:pointer; transition:all var(--t-fast) var(--ease);
+  display:flex; flex-direction:column; gap:5px; text-decoration:none; }
+.agent-card:hover { border-color:var(--border-hover); background:var(--surface-2); }
+.agent-card.off   { border-color:rgba(216,95,116,0.2); opacity:0.65; }
+.agent-card.off:hover { border-color:var(--danger); opacity:1; }
+.agent-status { display:flex; align-items:center; gap:6px; }
+.agent-dot    { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.dot-on  { background:var(--success); box-shadow:0 0 5px var(--success); }
+.dot-off { background:var(--danger); }
+.agent-st { font-size:10px; font-weight:500; }
+.agent-name { font-size:13px; color:var(--text);
+  font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.agent-ip  { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+.agent-id  { font-size:10px; color:var(--text-dim); }
+
+/* ══ UTILS ══ */
+.spin { display:inline-block; width:14px; height:14px;
+  border:2px solid var(--border); border-top-color:var(--accent);
+  border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg) } }
+.loading { display:flex; align-items:center; gap:12px; padding:24px 16px;
+  font-size:12px; color:var(--text-dim); }
+.err-txt { font-size:12px; color:var(--danger); padding:16px; }
+.refresh-ts { font-size:11px; color:var(--text-dim); margin-left:auto; }
+
+/* ══ SKELETON LOADERS ══ */
+.skel{background:var(--surface-2);border-radius:6px;position:relative;overflow:hidden;}
+.skel::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
+  animation:shimmer 1.5s infinite;}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.skel-val{width:80px;height:44px;margin-bottom:4px;}
+.skel-row{height:58px;border-radius:8px;margin-bottom:6px;}
+.skel-card{height:100px;border-radius:8px;}
+.skel-summary{height:18px;width:60%;margin:10px 0;}
+
+/* ══ SMOOTH REFRESH ══ */
+.fade-swap{transition:opacity 0.15s ease;}
+.fade-swap.fading{opacity:0.3;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ══ TIME RANGE BAR ══ -->
+<div class="time-bar">
+  <div class="time-label">PÉRIODE</div>
+  <div class="time-presets">
+    <button class="tp" data-range="15m"  onclick="setRange('15m',this)">15 MIN</button>
+    <button class="tp" data-range="1h"   onclick="setRange('1h',this)">1 H</button>
+    <button class="tp" data-range="6h"   onclick="setRange('6h',this)">6 H</button>
+    <button class="tp active" data-range="24h" onclick="setRange('24h',this)">24 H</button>
+    <button class="tp" data-range="7d"   onclick="setRange('7d',this)">7 JOURS</button>
+    <button class="tp" data-range="30d"  onclick="setRange('30d',this)">30 JOURS</button>
+    <button class="tp" data-range="all"  onclick="setRange('all',this)">TOUT</button>
+    <button class="tp" data-range="custom" onclick="setRange('custom',this)">CUSTOM ▾</button>
+  </div>
+
+  <!-- Custom inputs (cachés par défaut) -->
+  <div class="custom-range" id="custom-range">
+    <span style="font-size:9px;color:var(--txt3);letter-spacing:0.15em">DE</span>
+    <input class="dt-input" type="datetime-local" id="dt-from" />
+    <span style="font-size:9px;color:var(--txt3);letter-spacing:0.15em">À</span>
+    <input class="dt-input" type="datetime-local" id="dt-to" />
+    <button class="btn-apply" onclick="applyCustom()">APPLIQUER</button>
+  </div>
+
+  <div class="time-sep"></div>
+  <div class="period-pill" id="period-pill">Dernières 24 heures</div>
+
+  <!-- Auto-refresh -->
+  <div class="refresh-group">
+    <span class="refresh-label">AUTO ↻</span>
+    <button class="rr active" data-interval="30"  onclick="setRefresh(30,this)">30s</button>
+    <button class="rr"        data-interval="60"  onclick="setRefresh(60,this)">1m</button>
+    <button class="rr"        data-interval="300" onclick="setRefresh(300,this)">5m</button>
+    <button class="rr"        data-interval="0"   onclick="setRefresh(0,this)">OFF</button>
+  </div>
+</div>
+
+<!-- ══ STATS ══ -->
+<div class="dash-stats">
+  <div class="stat-card" style="--accent:var(--cyan)">
+    <div class="stat-label">Alertes totales</div>
+    <div class="stat-val" id="s-total"><div class="skel skel-val"></div></div>
+    <div class="stat-sub" id="s-total-sub">SUR LA PÉRIODE</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--hot)">
+    <div class="stat-label">Alertes critiques</div>
+    <div class="stat-val" id="s-crit"><div class="skel skel-val"></div></div>
+    <div class="stat-sub">NIVEAU ≥ 12</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--go)">
+    <div class="stat-label">Agents actifs</div>
+    <div class="stat-val" id="s-active"><div class="skel skel-val"></div></div>
+    <div class="stat-sub" id="s-agents-sub">SUR WAZUH</div>
+  </div>
+  <div class="stat-card" style="--accent:var(--warn)">
+    <div class="stat-label">Investigations IA</div>
+    <div class="stat-val" id="s-invest"><div class="skel skel-val"></div></div>
+    <div class="stat-sub">CETTE SESSION</div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="dash-main">
+
+  <!-- Alert feed -->
+  <div>
+    <div class="sec-head">
+      <div class="sec-title">ALERTES CRITIQUES</div>
+      <div class="sec-badge" id="crit-badge">…</div>
+      <div class="sec-line"></div>
+      <div class="refresh-ts" id="refresh-ts">—</div>
+      <a class="sec-link" href="/alerts">TOUTES →</a>
+    </div>
+    <div class="alert-feed fade-swap" id="alert-feed">
+      <div class="skel skel-row"></div><div class="skel skel-row"></div><div class="skel skel-row"></div>
+    </div>
+  </div>
+
+  <!-- Right col -->
+  <div class="right-col">
+    <div>
+      <div class="sec-head">
+        <div class="sec-title">AGENTS</div>
+        <div class="sec-line"></div>
+        <a class="sec-link" href="/agents">VOIR TOUT →</a>
+      </div>
+      <div class="panel fade-swap" id="agent-summary">
+        <div class="skel skel-summary"></div><div class="skel skel-summary" style="width:40%"></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-head">
+        <div class="sec-title">SOC STATUS</div>
+        <div class="sec-line"></div>
+      </div>
+      <div class="panel">
+        <div class="summary-row">
+          <span class="summary-key">GROQ MODEL</span>
+          <span class="summary-txt" style="color:var(--cyan)">GPT-OSS 120B</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">ALERTES ÉLEVÉES</span>
+          <span class="summary-val c-high" id="s-elev">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">HORS LIGNE</span>
+          <span class="summary-val c-crit" id="s-disconn">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">SNMP</span>
+          <span class="summary-txt" style="color:var(--go)">UDP 162 ✓</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-key">OPENSEARCH</span>
+          <span class="summary-txt" style="color:var(--go)">192.168.0.95:9200</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AGENTS GRID ══ -->
+<div>
+  <div class="sec-head">
+    <div class="sec-title">VUE AGENTS</div>
+    <div class="sec-badge" id="agents-badge">…</div>
+    <div class="sec-line"></div>
+  </div>
+  <div class="agents-grid fade-swap" id="agents-grid">
+    <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
+    <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ══ State ══ */
+let currentRange  = '24h';
+let customFrom    = null;
+let customTo      = null;
+let refreshTimer  = null;
+let refreshSecs   = 30;
+
+/* ══ Labels période ══ */
+const RANGE_LABELS = {
+  '15m': 'Dernières 15 minutes', '1h':  'Dernière heure',
+  '6h':  'Dernières 6 heures',   '24h': 'Dernières 24 heures',
+  '7d':  'Derniers 7 jours',     '30d': 'Derniers 30 jours',
+  'all': 'Toutes périodes',      'custom': 'Plage personnalisée',
+};
+
+/* ══ Helpers ══ */
+function toLocalISO(d){
+  const p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+}
+function smoothSwap(el, html){
+  el.classList.add('fading');
+  setTimeout(()=>{el.innerHTML=html;el.classList.remove('fading');},150);
+}
+function fmt(n) {
+  if (n === undefined || n === null) return '—';
+  return Number(n).toLocaleString('fr-FR');
+}
+function ts(t) {
+  if (!t) return '—';
+  try {
+    const d = new Date(t);
+    return d.toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  } catch(e) { return String(t).slice(0,16); }
+}
+function trunc(s, n) { return s && s.length > n ? s.slice(0,n) + '…' : (s||''); }
+function lvlCls(l) { return l>=12?'c-crit':l>=9?'c-high':l>=5?'c-med':'c-low'; }
+function rowCls(l) { return l>=12?'a-crit':l>=9?'a-high':l>=5?'a-med':''; }
+
+/* ══ Build API URL ══ */
+function dashUrl() {
+  let u = `/api/dashboard?range=${currentRange}`;
+  if (currentRange === 'custom' && customFrom) {
+    u += `&from_ts=${encodeURIComponent(customFrom)}`;
+    if (customTo) u += `&to_ts=${encodeURIComponent(customTo)}`;
+  }
+  return u;
+}
+
+/* ══ Time range selection ══ */
+function setRange(r, btn) {
+  currentRange = r;
+  document.querySelectorAll('.tp').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cr = document.getElementById('custom-range');
+  if (r === 'custom') {
+    cr.classList.add('open');
+    // Pré-remplir avec les dernières 24h si vide
+    if (!document.getElementById('dt-from').value) {
+      const now  = new Date();
+      const ago  = new Date(now - 86400000);
+      document.getElementById('dt-from').value = toLocalISO(ago);
+      document.getElementById('dt-to').value   = toLocalISO(now);
+    }
+    return;   // Attendre "APPLIQUER"
+  } else {
+    cr.classList.remove('open');
+  }
+  document.getElementById('period-pill').textContent = RANGE_LABELS[r] || r;
+  fullRefresh();
+}
+
+function localToISO(val){
+  const d=new Date(val);
+  const off=-d.getTimezoneOffset();
+  const sign=off>=0?'+':'-';
+  const hh=String(Math.floor(Math.abs(off)/60)).padStart(2,'0');
+  const mm=String(Math.abs(off)%60).padStart(2,'0');
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
+    +'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':00'+sign+hh+':'+mm;
+}
+function applyCustom() {
+  const f = document.getElementById('dt-from').value;
+  const t = document.getElementById('dt-to').value;
+  if (!f) { alert('Veuillez saisir une date de début.'); return; }
+  customFrom = localToISO(f);
+  customTo   = t ? localToISO(t) : null;
+  const lbl  = f.slice(0,16).replace('T',' ') + ' → ' + (t ? t.slice(0,16).replace('T',' ') : 'maintenant');
+  document.getElementById('period-pill').textContent = lbl;
+  fullRefresh();
+}
+
+/* ══ Auto-refresh ══ */
+function setRefresh(secs, btn) {
+  refreshSecs = secs;
+  document.querySelectorAll('.rr').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  clearInterval(refreshTimer);
+  if (secs > 0) {
+    refreshTimer = setInterval(fullRefresh, secs * 1000);
+  }
+}
+
+/* ══ Dashboard data ══ */
+async function loadDashboard() {
+  try {
+    const r = await fetch(dashUrl());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+
+    document.getElementById('s-total').textContent  = fmt(d.alerts?.total);
+    document.getElementById('s-crit').textContent   = fmt(d.alerts?.critical);
+    document.getElementById('s-active').textContent = d.agents?.active ?? '—';
+    document.getElementById('s-invest').textContent = d.investigations?.total ?? '—';
+    document.getElementById('s-elev').textContent   = fmt(d.alerts?.elevated);
+    document.getElementById('s-disconn').textContent= d.agents?.disconnected ?? '—';
+    document.getElementById('s-agents-sub').textContent = 'SUR ' + (d.agents?.total ?? '?') + ' TOTAL';
+    document.getElementById('s-total-sub').textContent  =
+      (currentRange === 'all' ? 'TOUTES PÉRIODES' : RANGE_LABELS[currentRange] || currentRange).toUpperCase();
+
+    /* Feed alertes critiques */
+    const feed  = d.critical_feed || [];
+    document.getElementById('crit-badge').textContent = feed.length + ' ALERTES';
+    const feedEl = document.getElementById('alert-feed');
+    if (!feed.length) {
+      smoothSwap(feedEl, '<div class="loading" style="color:var(--go)">✓ AUCUNE ALERTE CRITIQUE SUR LA PÉRIODE</div>');
+    } else {
+      smoothSwap(feedEl, feed.map(a => `
+        <a class="alert-row ${rowCls(a.level)}" href="/investigate?alert_id=${a._id}&_index=${encodeURIComponent(a._index||'')}">
+          <div class="alert-lvl ${lvlCls(a.level)}">${a.level}</div>
+          <div>
+            <div class="alert-desc">${trunc(a.description, 72)}</div>
+            <div class="alert-meta">${a.agent_name} &nbsp;·&nbsp; ${ts(a.timestamp)} &nbsp;·&nbsp; ${(a.groups||[]).slice(0,2).join(', ')}</div>
+          </div>
+          ${a.src_ip ? `<div class="alert-ip">${a.src_ip}</div>` : '<div></div>'}
+          <div class="btn-inv">ENQUÊTER</div>
+        </a>
+      `).join(''));
+    }
+
+    /* Timestamp MAJ */
+    const now = new Date();
+    document.getElementById('refresh-ts').textContent = 'MAJ ' +
+      [now.getHours(), now.getMinutes(), now.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');
+
+  } catch(e) {
+    document.getElementById('alert-feed').innerHTML =
+      `<div class="err-txt">ERREUR API: ${e.message}</div>`;
+    console.error('Dashboard', e);
+  }
+}
+
+/* ══ Agents ══ */
+async function loadAgents() {
+  try {
+    const r = await fetch('/api/agents');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const agents = await r.json();
+
+    document.getElementById('agents-badge').textContent = agents.length + ' MACHINES';
+
+    const active = agents.filter(a => a.status === 'active');
+    const off    = agents.filter(a => a.status !== 'active');
+
+    smoothSwap(document.getElementById('agent-summary'), `
+      <div class="summary-row">
+        <span class="summary-key">ACTIFS</span>
+        <span class="summary-val" style="color:var(--go)">${active.length}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-key">HORS LIGNE</span>
+        <span class="summary-val" style="color:var(--hot)">${off.length}</span>
+      </div>
+      ${off.length ? `<div style="margin-top:8px">
+        ${off.slice(0,6).map(a=>`<div class="offline-item">${a.name}</div>`).join('')}
+        ${off.length>6 ? `<div style="font-size:10px;color:var(--txt3);padding:4px 0">+${off.length-6} autres…</div>` : ''}
+      </div>` : ''}
+    `);
+
+    const sorted = [
+      ...active.sort((a,b) => (a.name||'').localeCompare(b.name||'')),
+      ...off   .sort((a,b) => (a.name||'').localeCompare(b.name||'')),
+    ];
+    smoothSwap(document.getElementById('agents-grid'), sorted.map(a => {
+      const on = a.status === 'active';
+      return `
+        <a class="agent-card ${on ? '' : 'off'}"
+           href="/investigate/agent?name=${encodeURIComponent(a.name)}">
+          <div class="agent-status">
+            <div class="agent-dot ${on ? 'dot-on' : 'dot-off'}"></div>
+            <span class="agent-st" style="color:${on?'var(--go)':'var(--hot)'}">${on?'ACTIF':'HORS LIGNE'}</span>
+          </div>
+          <div class="agent-name">${a.name||'—'}</div>
+          <div class="agent-ip">${a.ip||'—'}</div>
+          <div class="agent-id">ID ${String(a.id||'').padStart(3,'0')}</div>
+        </a>`;
+    }).join(''));
+
+  } catch(e) {
+    smoothSwap(document.getElementById('agents-grid'),
+      `<div class="err-txt">ERREUR AGENTS: ${e.message}</div>`);
+    console.error('Agents', e);
+  }
+}
+
+/* ══ Full refresh (dashboard + agents ensemble) ══ */
+async function fullRefresh() {
+  await Promise.all([loadDashboard(), loadAgents()]);
+}
+
+/* ══ Init ══ */
+fullRefresh();
+// Auto-refresh 30s — dashboard ET agents synchronisés
+refreshTimer = setInterval(fullRefresh, 30000);
+</script>
+=======
+{% block title %}OCII-IRIS // SYSTÈME{% endblock %}
+{% block content %}
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;">
+  <div style="font-size:7px;letter-spacing:0.4em;color:var(--txt3);">SYSTÈME OPÉRATIONNEL</div>
+  <div style="font-family:var(--head);font-size:52px;letter-spacing:0.2em;color:var(--cyan);text-shadow:0 0 30px rgba(0,229,255,0.3);">OCII-IRIS</div>
+  <div style="font-family:var(--sans);font-size:12px;color:var(--txt2);max-width:360px;line-height:1.7;font-weight:300;">
+    Cliquez sur une alerte depuis votre dashboard Grafana pour déclencher une investigation automatique.
+  </div>
+  <div style="margin-top:8px;padding:10px 20px;border:1px solid var(--wire);font-size:9px;letter-spacing:0.15em;color:var(--txt3);">
+    ENDPOINT → <span style="color:var(--cyan)">/investigate?alert_id=XXXX</span>
+  </div>
+</div>
+>>>>>>> d720f2b6649172b6438eed3b49b13a24f226495e
+{% endblock %}
